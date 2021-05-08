@@ -1,0 +1,10 @@
+# Project exclude paths
+/.gradle/
+/buildSrc/.gradle/
+/buildSrc/build/
+/editor/build/
+/engine/build/
+/game/build/
+/netApi/build/
+/server/build/
+/shared/build/
