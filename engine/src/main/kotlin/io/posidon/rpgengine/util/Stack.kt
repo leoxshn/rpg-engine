@@ -1,6 +1,7 @@
 package io.posidon.rpgengine.util
 
 import org.lwjgl.system.MemoryStack
+import org.lwjgl.system.MemoryUtil
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
@@ -8,28 +9,33 @@ import kotlin.contracts.contract
 inline class Stack(val stack: MemoryStack) {
 
     @OptIn(ExperimentalContracts::class)
-    inline fun push(fn: (Stack) -> Unit) {
+    inline fun <T> push(fn: (Stack) -> T): T {
         contract { callsInPlace(fn, InvocationKind.EXACTLY_ONCE) }
-        fn(Stack(stack.push()))
+        val r = fn(Stack(stack.push()))
         stack.pop()
+        return r
     }
 
-    fun callocInt(size: Int) = stack.callocInt(size)
-    fun callocLong(size: Int) = stack.callocLong(size)
-    fun callocFloat(size: Int) = stack.callocFloat(size)
-    fun callocPointer(size: Int) = stack.callocPointer(size)
+    inline fun callocInt(size: Int) = stack.callocInt(size)
+    inline fun callocLong(size: Int) = stack.callocLong(size)
+    inline fun callocFloat(size: Int) = stack.callocFloat(size)
+    inline fun callocPointer(size: Int) = stack.callocPointer(size)
 
-    fun mallocInt(size: Int) = stack.mallocInt(size)
-    fun mallocLong(size: Int) = stack.mallocLong(size)
-    fun mallocFloat(size: Int) = stack.mallocFloat(size)
-    fun mallocPointer(size: Int) = stack.mallocPointer(size)
+    inline fun mallocInt(size: Int) = stack.mallocInt(size)
+    inline fun mallocLong(size: Int) = stack.mallocLong(size)
+    inline fun mallocFloat(size: Int) = stack.mallocFloat(size)
+    inline fun mallocPointer(size: Int) = stack.mallocPointer(size)
+
+    inline fun int(vararg v: Int) = mallocInt(v.size).put(v).flip()
+    inline fun long(vararg v: Long) = mallocLong(v.size).put(v).flip()
+    inline fun float(vararg v: Float) = mallocFloat(v.size).put(v).flip()
 
     companion object {
         inline fun get(): Stack = Stack(MemoryStack.stackGet())
         @OptIn(ExperimentalContracts::class)
-        inline fun push(fn: (Stack) -> Unit) {
+        inline fun <T> push(fn: (Stack) -> T): T {
             contract { callsInPlace(fn, InvocationKind.EXACTLY_ONCE) }
-            get().push(fn)
+            return get().push(fn)
         }
     }
 }

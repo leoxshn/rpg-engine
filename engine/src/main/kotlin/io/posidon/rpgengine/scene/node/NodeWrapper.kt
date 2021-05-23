@@ -1,6 +1,7 @@
 package io.posidon.rpgengine.scene.node
 
 import io.posidon.rpgengine.debug.MainLogger
+import io.posidon.rpgengine.events.InputManager
 import io.posidon.rpgengine.gfx.Context
 import io.posidon.rpgengine.gfx.renderer.Renderer
 import io.posidon.rpgengine.window.Window
@@ -10,7 +11,7 @@ open class NodeWrapper<T : Node> : Node() {
         set(value) {
             field = value
             if (value != null && initialized) {
-                value.internalInit(log, context)
+                value.internalInit(log, context, input)
                 value.init()
             }
         }
@@ -19,10 +20,11 @@ open class NodeWrapper<T : Node> : Node() {
 
     override fun internalInit(
         log: MainLogger,
-        context: Context
+        context: Context,
+        input: InputManager
     ) {
-        super.internalInit(log, context)
-        node?.internalInit(log, context)
+        super.internalInit(log, context, input)
+        node?.internalInit(log, context, input)
     }
 
     override fun init() {

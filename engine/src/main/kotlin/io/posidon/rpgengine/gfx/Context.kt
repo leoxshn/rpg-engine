@@ -6,6 +6,7 @@ import io.posidon.game.shared.types.Mat4f
 import io.posidon.game.shared.types.Vec2f
 import io.posidon.game.shared.types.Vec3f
 import io.posidon.game.shared.types.Vec3i
+import io.posidon.rpgengine.gfx.assets.Font
 import io.posidon.rpgengine.gfx.assets.Mesh
 import io.posidon.rpgengine.gfx.assets.Shader
 import io.posidon.rpgengine.gfx.assets.Texture
@@ -17,6 +18,7 @@ interface Context {
     fun loadShader(log: MainLogger, fragmentPath: String, vertexPath: String): Shader
     fun makeMesh(indices: IntArray, vararg vbos: Mesh.VBO): Mesh
     fun makeVBO(size: Int, vararg floats: Float): Mesh.VBO
+    fun loadTTF(log: MainLogger, path: String): Font
 }
 
 internal fun getContext() = OpenGLContext

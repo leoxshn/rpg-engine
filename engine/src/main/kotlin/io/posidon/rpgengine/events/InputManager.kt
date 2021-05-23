@@ -47,7 +47,7 @@ class InputManager {
         return Vec2f(x, y).apply { selfNormalize() }
     }
 
-    fun onKeyPressed(window: Window, key: Int, scanCode: Int, action: Int, mods: Int) {
+    internal fun onKeyPressed(window: Window, key: Int, scanCode: Int, action: Int, mods: Int) {
         keys[key] = action
         when (key) {
             Key.W -> goUp = action != Action.RELEASE
@@ -57,17 +57,17 @@ class InputManager {
         }
     }
 
-    fun onMouseButtonPress(window: Window, btn: Int, action: Int, mods: Int) {
+    internal fun onMouseButtonPress(window: Window, btn: Int, action: Int, mods: Int) {
         mouseButtons[btn] = action
     }
 
-    fun onScroll(window: Window, x: Double, y: Double) {
+    internal fun onScroll(window: Window, x: Double, y: Double) {
 
     }
 
     private var oldCurX = 0.0
     private var oldCurY = 0.0
-    fun onMouseMove(window: Window, x: Double, y: Double) {
+    internal fun onMouseMove(window: Window, x: Double, y: Double) {
         if (mouseLocked) {
             curX = x
             curY = y
@@ -80,13 +80,13 @@ class InputManager {
         }
     }
 
-    fun init(window: Window) {
+    internal fun init(window: Window) {
         windowID = window.id
         keys = MemoryUtil.memCallocInt(GLFW.GLFW_KEY_LAST)
         mouseButtons = MemoryUtil.memCallocInt(GLFW.GLFW_MOUSE_BUTTON_LAST)
     }
 
-    fun destroy() {
+    internal fun destroy() {
         MemoryUtil.memFree(keys)
         MemoryUtil.memFree(mouseButtons)
     }

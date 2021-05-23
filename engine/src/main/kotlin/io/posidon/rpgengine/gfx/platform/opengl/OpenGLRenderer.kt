@@ -16,10 +16,16 @@ internal class OpenGLRenderer : Renderer {
     lateinit var QUAD: Mesh private set
 
     override fun preWindowInit() {
+        GLFW.glfwDefaultWindowHints()
+
         GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MAJOR, 3)
         GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MINOR, 2)
         GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_PROFILE, GLFW.GLFW_OPENGL_CORE_PROFILE)
-        GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_FORWARD_COMPAT, GL11.GL_TRUE)
+        GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_FORWARD_COMPAT, GLFW.GLFW_TRUE)
+
+        GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_DEBUG_CONTEXT, GLFW.GLFW_TRUE)
+
+        GLFW.glfwWindowHint(GLFW.GLFW_SRGB_CAPABLE, GLFW.GLFW_TRUE)
 
         // Antialiasing
         GLFW.glfwWindowHint(GLFW.GLFW_STENCIL_BITS, 4)
@@ -65,16 +71,16 @@ internal class OpenGLRenderer : Renderer {
     override fun renderQuad(window: Window, quadShader: QuadShader, x: Float, y: Float, width: Float, height: Float) {
         QUAD.bind()
         quadShader.shader.bind()
-        quadShader.position(Vec2f(x / window.widthInUnits, y / window.heightInTiles))
-        quadShader.size(Vec2f(width / window.widthInUnits, height / window.heightInTiles))
+        quadShader.position(Vec2f(x / window.widthInTiles, y / window.heightInTiles))
+        quadShader.size(Vec2f(width / window.widthInTiles, height / window.heightInTiles))
         GL11C.glDrawElements(GL11.GL_TRIANGLES, QUAD.vertexCount, GL11.GL_UNSIGNED_INT, 0)
     }
 
     override fun renderMesh(mesh: Mesh, window: Window, shader: QuadShader, x: Float, y: Float, scaleX: Float, scaleY: Float) {
         mesh.bind()
         shader.shader.bind()
-        shader.position(Vec2f(x / window.widthInUnits, y / window.heightInTiles))
-        shader.size(Vec2f(scaleX / window.widthInUnits, scaleY / window.heightInTiles))
+        shader.position(Vec2f(x / window.widthInTiles, y / window.heightInTiles))
+        shader.size(Vec2f(scaleX / window.widthInTiles, scaleY / window.heightInTiles))
         GL11C.glDrawElements(GL11.GL_TRIANGLES, mesh.vertexCount, GL11.GL_UNSIGNED_INT, 0)
     }
 

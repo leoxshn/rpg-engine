@@ -68,6 +68,4 @@ abstract class Application {
         height: Int,
         title: String? = null
     ) = WindowCreationData(width, height, title)
-
-    fun loadTexture(path: String): Texture = context.loadTexture(log, path)
 }

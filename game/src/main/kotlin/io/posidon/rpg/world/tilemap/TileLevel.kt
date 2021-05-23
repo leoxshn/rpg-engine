@@ -41,8 +41,9 @@ class TileLevel {
         for (x in 0 until TileChunk.SIZE) {
             for (y in 0 until TileChunk.SIZE) {
                 if (get(x, y) != null) {
-                    val bitmask = getBitmask(x, y, h, getTile)
-                    map.getOrPut(tileset.meta.bitmasks.getOrElse(bitmask) { Vec2i(0, 0) }) { arrayListOf() }.add(Vec2i(x, y))
+                    val b = getBitmask(x, y, h, getTile)
+                    val bitmasks = tileset.meta.bitmasks
+                    map.getOrPut(bitmasks[b] ?: bitmasks[0b111_111_111] ?: Vec2i.zero()) { arrayListOf() }.add(Vec2i(x, y))
                 }
             }
         }
@@ -59,6 +60,6 @@ class TileLevel {
         if (getTile(x - 1, y + 1, h) != null) bitmask = bitmask or 0b100_000_000
         if (getTile(x - 1, y, h) != null) bitmask = bitmask or 0b000_100_000
         if (getTile(x - 1, y - 1, h) != null) bitmask = bitmask or 0b000_000_100
-        return bitmask.also { println(it.toString(2)) }
+        return bitmask
     }
 }

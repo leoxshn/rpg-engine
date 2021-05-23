@@ -23,10 +23,6 @@ object Dependencies {
     }
 
     fun lwjglNatives(subLib: String? = null): String {
-        return if (subLib != null) {
-            "org.lwjgl:lwjgl-$subLib:${Versions.lwjglVersion}"
-        } else {
-            "org.lwjgl:lwjgl:${Versions.lwjglVersion}"
-        }
+        return lwjgl(subLib) + ":${Versions.lwjglNatives}"
     }
 }

@@ -6,14 +6,17 @@ import io.posidon.rpgengine.debug.i
 import io.posidon.rpgengine.debug.invoke
 import io.posidon.rpgengine.events.InputManager
 import io.posidon.game.shared.Format
+import io.posidon.game.shared.types.Vec2f
+import io.posidon.game.shared.types.Vec2i
 import io.posidon.rpgengine.gfx.renderer.Renderer
+import io.posidon.rpgengine.util.Stack
 import org.lwjgl.glfw.GLFW
 import org.lwjgl.glfw.GLFWErrorCallback
 
 class Window internal constructor(private val renderer: Renderer) : Describable {
 
     var heightInTiles: Float = 12f
-    inline val widthInUnits: Float get() = heightInTiles / height * width
+    inline val widthInTiles: Float get() = heightInTiles / height * width
 
     var width: Int
         set(value) {
@@ -48,6 +51,17 @@ class Window internal constructor(private val renderer: Renderer) : Describable 
      * This is pretty self-explanatory, isn't it?
      */
     inline val shouldClose get() = GLFW.glfwWindowShouldClose(id)
+
+    /**
+     * Current DPI / default DPI
+     */
+    inline val contentScale: Vec2f
+        get() = Stack.push {
+            val x = it.mallocFloat(1)
+            val y = it.mallocFloat(1)
+            GLFW.glfwGetWindowContentScale(id, x, y)
+            Vec2f(x[0], y[0])
+        }
 
     /**
      * Sets the window to be fullscreen or not

@@ -4,6 +4,7 @@ import io.posidon.rpgengine.debug.MainLogger
 import io.posidon.rpgengine.debug.i
 import io.posidon.game.shared.Resources
 import io.posidon.rpgengine.gfx.*
+import io.posidon.rpgengine.gfx.assets.Font
 import io.posidon.rpgengine.gfx.assets.Mesh
 import io.posidon.rpgengine.gfx.assets.Shader
 import io.posidon.rpgengine.gfx.assets.Texture
@@ -16,6 +17,9 @@ import io.posidon.rpgengine.util.Stack
 import io.posidon.rpgengine.util.set
 import org.lwjgl.opengl.*
 import org.lwjgl.stb.STBImage
+import org.lwjgl.stb.STBTTBakedChar
+import org.lwjgl.stb.STBTTFontinfo
+import org.lwjgl.stb.STBTruetype
 import java.io.FileNotFoundException
 import java.nio.ByteBuffer
 import java.nio.IntBuffer
@@ -121,4 +125,57 @@ object OpenGLContext : Context {
     }
 
     override fun makeVBO(size: Int, vararg floats: Float): Mesh.VBO = OpenGLMesh.FloatVBO(size, floats)
+
+    override fun loadTTF(log: MainLogger, path: String): Font {
+        val ttf = Resources.loadAsByteBuffer(path, 1024 * 1024)
+        val ttfBuffer = Heap.malloc(ttf.size).put(ttf).flip()
+
+        val info = STBTTFontinfo.create()
+        check(STBTruetype.stbtt_InitFont(info, ttfBuffer)) {
+            "Failed to initialize font info"
+        }
+
+        return Stack.push { stack ->
+            val pAscent = stack.mallocInt(1)
+            val pDescent = stack.mallocInt(1)
+            val pLineGap = stack.mallocInt(1)
+
+            STBTruetype.stbtt_GetFontVMetrics(info, pAscent, pDescent, pLineGap)
+
+            val texID = GL11.glGenTextures()
+            val charData = STBTTBakedChar.malloc(1024)
+
+            val bitmap = Heap.malloc(Font.BITMAP_WIDTH * Font.BITMAP_HEIGHT)
+            check(STBTruetype.stbtt_BakeFontBitmap(
+                ttfBuffer,
+                Font.BITMAP_PX_HEIGHT,
+                bitmap,
+                Font.BITMAP_WIDTH,
+                Font.BITMAP_HEIGHT,
+                32,
+                charData
+            ) != 0) {
+                "Failed baking the bitmap"
+            }
+
+            GL11.glBindTexture(GL11.GL_TEXTURE_2D, texID)
+            GL11.glPixelStorei(GL11.GL_UNPACK_ALIGNMENT, 1)
+            GL11.glTexImage2D(
+                GL11.GL_TEXTURE_2D,
+                0,
+                GL11.GL_RED,
+                Font.BITMAP_WIDTH,
+                Font.BITMAP_HEIGHT,
+                0,
+                GL11.GL_RED,
+                GL11.GL_UNSIGNED_BYTE,
+                bitmap
+            )
+            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR)
+            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR)
+
+            val texture = OpenGLTexture(texID, Font.BITMAP_WIDTH, Font.BITMAP_HEIGHT)
+            Font(texture, info, pAscent[0], pDescent[0], pLineGap[0], charData, ttfBuffer)
+        }
+    }
 }

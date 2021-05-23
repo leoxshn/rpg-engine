@@ -20,11 +20,11 @@ fun main(args: Array<String>) {
 	Server.start {
 		Player(it).also { player ->
 			player.init()
-			player.send(ServerApi.init(0f, World.getDefaultSpawnPosition().toFloat(), 0f, buildString {
+			player.send(ServerApi.init(0f, World.getDefaultSpawnPosition().toFloat(), 0, buildString {
 				for (value in Block.values())
 					append(value.ordinal).append('=').append(value.id).append(',')
 				deleteCharAt(lastIndex)
-			}))
+			}, World.sizeInChunks))
 			Console.beforeCmdLine {
 				Console.printInfo(player.name, " joined the server")
 			}

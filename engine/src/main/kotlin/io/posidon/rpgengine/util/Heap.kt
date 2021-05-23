@@ -17,9 +17,9 @@ object Heap {
     inline fun mallocPointer(size: Int) = MemoryUtil.memAllocPointer(size)
     inline fun malloc(size: Int) = MemoryUtil.memAlloc(size)
 
-    inline fun int(vararg v: Int) = MemoryUtil.memAllocInt(v.size).put(v).flip()
-    inline fun long(vararg v: Long) = MemoryUtil.memAllocLong(v.size).put(v).flip()
-    inline fun float(vararg v: Float) = MemoryUtil.memAllocFloat(v.size).put(v).flip()
+    inline fun int(vararg v: Int) = mallocInt(v.size).put(v).flip()
+    inline fun long(vararg v: Long) = mallocLong(v.size).put(v).flip()
+    inline fun float(vararg v: Float) = mallocFloat(v.size).put(v).flip()
 
     inline fun free(buff: Buffer) = MemoryUtil.memFree(buff)
 

@@ -40,7 +40,7 @@ abstract class Scene {
         val c = b.nodes
         children = Array(c.size) {
             c[it].apply {
-                this.internalInit(log, context)
+                this.internalInit(log, context, input)
             }
         }
         this.renderer = b.renderer

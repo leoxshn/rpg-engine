@@ -13,29 +13,22 @@ import io.posidon.rpgengine.window.Window
 
 class TileMap(val sizeInChunks: Int) : Node() {
 
-    var assets: Assets? = null
-
-    class Assets(
-        val cliffTileset: Tileset,
-        var shader: QuadShader,
-        var spriteSheet: Texture
-    ) {
-        fun destroy() {
-            shader.destroy()
-            spriteSheet.destroy()
-        }
-    }
-
-    override fun init() {
-        assets = Assets(
-            cliffTileset = context.loadTileset(log, "/textures/tiles/dark_cobble"),
+    val assets by onInit {
+        Assets(
+            cliffTileset = context.loadTileset(log, "/textures/tiles/dark_cobble").apply {
+                texture.setMagFilter(Texture.MagFilter.NEAREST)
+                texture.setMinFilter(Texture.MinFilter.NEAREST)
+            },
             shader = context.loadQuadShader(log, "/shaders/tile_chunk.fsh"),
             spriteSheet = context.loadTexture(log, "/textures/player-walk.png").apply {
                 setMagFilter(Texture.MagFilter.NEAREST)
                 setMinFilter(Texture.MinFilter.NEAREST)
             }
         )
-        getChunk(0, 0)!!.levels[0]!!.generateCliff(assets!!.cliffTileset, 0) { x, y, h ->
+    }
+
+    override fun init() {
+        getChunk(0, 0)!!.levels[0]!!.generateCliff(assets.cliffTileset, 0) { x, y, h ->
             val pos = Vec2i(x, y) + Vec2i(0, 0)
             getTile(
                 Math.floorMod(pos.x, sizeInChunks * TileChunk.SIZE),
@@ -45,7 +38,7 @@ class TileMap(val sizeInChunks: Int) : Node() {
 
     override fun render(renderer: Renderer, window: Window) {
         for (chunk in chunks) {
-            chunk?.render(renderer, window, assets!!)
+            chunk?.render(renderer, window, assets)
         }
     }
 
@@ -68,7 +61,19 @@ class TileMap(val sizeInChunks: Int) : Node() {
         )?.levels?.get(h % TileChunk.HEIGHT)?.get(x % TileChunk.SIZE, y % TileChunk.SIZE)
     }
 
+    class Assets(
+        val cliffTileset: Tileset,
+        var shader: QuadShader,
+        var spriteSheet: Texture
+    ) {
+        fun destroy() {
+            shader.destroy()
+            spriteSheet.destroy()
+            cliffTileset.destroy()
+        }
+    }
+
     override fun destroy() {
-        assets!!.destroy()
+        assets.destroy()
     }
 }

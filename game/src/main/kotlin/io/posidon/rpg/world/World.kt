@@ -1,18 +1,19 @@
 package io.posidon.rpg.world
 
 import io.posidon.game.netApi.Packet
+import io.posidon.game.shared.types.Vec2f
 import io.posidon.rpg.Player
 import io.posidon.rpgengine.scene.Scene
 import io.posidon.rpgengine.scene.SceneChildrenBuilder
 import io.posidon.rpgengine.tools.Camera2D
+import io.posidon.rpgengine.ui.text.Text
 
 class World : Scene() {
-
-    val player by lazy { Player(input) }
 
     var time = 0.0
     val blockDictionary = HashMap<Int, String>()
 
+    val player = Player()
     var tileMap = TileMapWrapper()
 
     override fun SceneChildrenBuilder.build() {
@@ -22,6 +23,18 @@ class World : Scene() {
         - player
         - camera
         - ClientNode(this@World)
+        - Text(
+            "/fonts/JetBrains_mono.ttf",
+            128f,
+            "test text _ - lalala TEST TEST TEST 123456789 \n 1 5 8 1234 |~ñÑçÇ",
+            Vec2f(1f, 1f)
+        )
+        - Text(
+            "/fonts/JetBrains_mono.ttf",
+            18f,
+            "uranium\n123",
+            Vec2f(1f, 6f)
+        )
     }
 
     fun initWorld(sizeInChunks: Int) = tileMap.initTileMap(sizeInChunks)

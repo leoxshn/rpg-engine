@@ -15,6 +15,13 @@ object Resources {
         return result.toString()
     }
 
+    fun loadAsByteBuffer(path: String, bufferSize: Int): ByteArray {
+        val buffer = ByteArray(bufferSize)
+        val s = Resources::class.java.getResourceAsStream(path) ?: throw FileNotFoundException("Couldn't find the file $path")
+        s.use { it.read(buffer) }
+        return buffer
+    }
+
     fun getRealPath(path: String): String {
         return Resources::class.java.getResource(path)?.file ?: throw FileNotFoundException("No resource at \"$path\"")
     }

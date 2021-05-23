@@ -5,23 +5,25 @@ import io.posidon.game.netApi.PacketTypes
 import io.posidon.game.shared.types.Position
 import io.posidon.rpgengine.gfx.*
 import io.posidon.game.shared.types.Vec2f
-import io.posidon.rpgengine.events.InputManager
 import io.posidon.rpgengine.gfx.assets.Texture
 import io.posidon.rpgengine.gfx.renderer.Renderer
 import io.posidon.rpgengine.scene.node.Node
 import io.posidon.rpgengine.window.Window
 
-class Player(
-    val input: InputManager
-) : Node() {
+class Player : Node() {
 
     val position = Position.zero()
     val moveSpeed = 7.5f
     val acceleration = 12f
 
-    var shader: QuadShader? = null
+    val shader by onInit { context.loadQuadShader(log, "/shaders/player.fsh") }
+    val spriteSheet by onInit {
+        context.loadTexture(log, "/textures/player-walk.png").apply {
+            setMagFilter(Texture.MagFilter.NEAREST)
+            setMinFilter(Texture.MinFilter.NEAREST)
+        }
+    }
 
-    var spriteSheet: Texture? = null
     val spriteSheetWidth = 10
 
     var currentSprite = 0f
@@ -29,17 +31,9 @@ class Player(
     val runFPS = 15
     val spriteHeight = 1.6f
 
-    override fun init() {
-        shader = context.loadQuadShader(log, "/shaders/player.fsh")
-        spriteSheet = context.loadTexture(log, "/textures/player-walk.png").apply {
-            setMagFilter(Texture.MagFilter.NEAREST)
-            setMinFilter(Texture.MinFilter.NEAREST)
-        }
-    }
-
     override fun render(renderer: Renderer, window: Window) {
-        val shader = shader!!
-        val texture = spriteSheet!!
+        val shader = shader
+        val texture = spriteSheet
         shader.bind()
         shader["frame"] = Vec2f(currentSprite, 0f)
         shader["frame_to_sheet_ratio"] = Vec2f(1f / spriteSheetWidth, 1f)
@@ -63,8 +57,8 @@ class Player(
     }
 
     override fun destroy() {
-        shader!!.destroy()
-        spriteSheet!!.destroy()
+        shader.destroy()
+        spriteSheet.destroy()
     }
 
     fun onPacketReceived(packet: Packet) {

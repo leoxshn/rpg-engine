@@ -2,6 +2,7 @@ package io.posidon.game.netApi.client
 
 import io.posidon.game.netApi.Packet
 import java.io.*
+import java.net.ConnectException
 import java.net.Socket
 import java.net.SocketException
 import kotlin.concurrent.thread
@@ -39,7 +40,13 @@ class Client(
             catch (e: SocketException) { stop() }
             catch (e: StreamCorruptedException) { stop() }
             stop()
-        } catch (e: Exception) {
+        }
+        catch (e: SocketException) {
+            stop()
+            onResult(false)
+        }
+        catch (e: Exception) {
+            e.printStackTrace()
             onResult(false)
         }
     }

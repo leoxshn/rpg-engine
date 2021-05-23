@@ -7,7 +7,7 @@ import io.posidon.game.netApi.PacketTypes
 
 object ServerApi {
 
-    fun init(x: Float, y: Float, h: Float, blockDictionary: String): Packet = Packet.make(PacketTypes.INIT, blockDictionary, x, y, h)
+    fun init(x: Float, y: Float, h: Int, blockDictionary: String, sizeInChunks: Int): Packet = Packet.make(PacketTypes.INIT, blockDictionary, x, y, h, sizeInChunks)
 
     fun block(x: Int, y: Int, h: Int, id: Int): Packet = Packet.make(PacketTypes.SET_BLOCK, x, y, h, id)
 

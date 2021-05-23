@@ -1,4 +1,4 @@
-package io.posidon.rpg
+package io.posidon.rpgengine.editor
 
 import io.posidon.rpgengine.Application
 import io.posidon.rpgengine.gfx.renderer.setClearColor

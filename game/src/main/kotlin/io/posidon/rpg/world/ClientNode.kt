@@ -2,6 +2,7 @@ package io.posidon.rpg.world
 
 import io.posidon.game.netApi.Packet
 import io.posidon.game.netApi.PacketTypes
+import io.posidon.game.netApi.PacketTypes.INIT
 import io.posidon.game.netApi.client.Client
 import io.posidon.game.netApi.client.ClientApi
 import io.posidon.rpgengine.scene.node.Node
@@ -17,7 +18,7 @@ class ClientNode(val world: World) : Node() {
                     log.e("There was a connection error")
                 }
                 client.send(ClientApi.auth("leoxshn", "w04m58cyp49y59ti5ts9io3k"))
-                val line = client.waitForPacket("init")
+                val line = client.waitForPacket(INIT)
                 val tokens = line.split('&')
                 val defs = tokens[1].split(',')
                 for (def in defs) {
