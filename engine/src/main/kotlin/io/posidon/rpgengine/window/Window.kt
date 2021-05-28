@@ -4,16 +4,22 @@ import io.posidon.rpgengine.debug.Describable
 import io.posidon.rpgengine.debug.MainLogger
 import io.posidon.rpgengine.debug.i
 import io.posidon.rpgengine.debug.invoke
-import io.posidon.rpgengine.events.InputManager
+import io.posidon.rpgengine.input.InputManager
 import io.posidon.game.shared.Format
 import io.posidon.game.shared.types.Vec2f
-import io.posidon.game.shared.types.Vec2i
+import io.posidon.rpgengine.gfx.renderer.FrameBuffer
 import io.posidon.rpgengine.gfx.renderer.Renderer
 import io.posidon.rpgengine.util.Stack
 import org.lwjgl.glfw.GLFW
 import org.lwjgl.glfw.GLFWErrorCallback
+import org.lwjgl.opengl.GL11C
+import org.lwjgl.opengl.GL30
+import org.lwjgl.opengl.GL30C
+import java.util.*
 
-class Window internal constructor(private val renderer: Renderer) : Describable {
+class Window internal constructor(
+    private val renderer: Renderer
+) : Describable, FrameBuffer {
 
     var heightInTiles: Float = 12f
     inline val widthInTiles: Float get() = heightInTiles / height * width
@@ -128,6 +134,11 @@ class Window internal constructor(private val renderer: Renderer) : Describable 
         GLFW.glfwTerminate()
     }
 
+    override fun bind() {
+        GL30C.glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0)
+        GL11C.glViewport(0, 0, width, height)
+    }
+
     override fun describe(): String =
         """Window { 
         |    id: ${Format.pointer(id)}
@@ -135,7 +146,6 @@ class Window internal constructor(private val renderer: Renderer) : Describable 
         |    height: $height
         |    title: "${Format.doubleQuotesEscape(title)}"
         |}""".trimMargin()
-
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -149,6 +159,12 @@ class Window internal constructor(private val renderer: Renderer) : Describable 
     }
 
     override fun hashCode(): Int = id.hashCode()
+
+    private val onResizeListeners = LinkedList<(Window, Int, Int) -> Unit>()
+
+    fun addResizeListener(listener: (Window, width: Int, height: Int) -> Unit) {
+        onResizeListeners += listener
+    }
     
     private fun initCallbacks(input: InputManager) {
         input.init(this)
@@ -168,6 +184,7 @@ class Window internal constructor(private val renderer: Renderer) : Describable 
             _width = w
             _height = h
             renderer.onWindowResize(w, h)
+            onResizeListeners.forEach { it(this, w, h) }
         }
     }
     

@@ -13,7 +13,8 @@ class Camera2D(
     val followedPosition: Vec2f
 ) : Node() {
 
-    val renderer = object : ModifiedRenderer(renderer) {
+    val renderer = object : ModifiedRenderer {
+        override val renderer = renderer
         override fun renderQuad(window: Window, quadShader: QuadShader, x: Float, y: Float, width: Float, height: Float) {
             renderer.renderQuad(window, quadShader, x - xy.x, y - xy.y, width, height)
         }

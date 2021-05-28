@@ -3,8 +3,10 @@ package io.posidon.rpgengine.ui.text
 import io.posidon.game.shared.types.Vec2f
 import io.posidon.rpgengine.gfx.QuadShader
 import io.posidon.rpgengine.gfx.assets.Font
+import io.posidon.rpgengine.gfx.assets.invoke
 import io.posidon.rpgengine.gfx.loadQuadShader
 import io.posidon.rpgengine.gfx.renderer.Renderer
+import io.posidon.rpgengine.scene.Positional
 import io.posidon.rpgengine.scene.node.Node
 import io.posidon.rpgengine.util.Stack
 import io.posidon.rpgengine.util.set
@@ -15,21 +17,18 @@ import org.lwjgl.stb.STBTruetype
 import java.nio.IntBuffer
 
 class Text(
-    val fontPath: String,
     val fontHeight: Float,
-    val text: String,
-    val position: Vec2f
-) : Node() {
+    var text: String,
+    override var position: Vec2f,
+    val font: Font
+) : Node(), Positional<Vec2f> {
 
-    val font by onInit { context.loadTTF(log, fontPath) }
+    private val shader by quadShader("/shaders/text.fsh")
 
-    private val shader by onInit { context.loadQuadShader(log, "/shaders/text.fsh") }
-
-    fun isKerningEnabled() = false
+    fun isKerningEnabled() = true
 
     override fun render(renderer: Renderer, window: Window) {
 
-        shader.bind()
         font.texture.bind(0)
 
         val scale = fontHeight / Font.BITMAP_PX_HEIGHT
@@ -69,14 +68,16 @@ class Text(
                 val y0: Float = q.y0() * m.y
                 val y1: Float = q.y1() * m.y
 
-                shader["char_uv_start"] = Vec2f(q.s0(), q.t0())
-                shader["char_uv_end"] = Vec2f(q.s1(), q.t1())
+                shader {
+                    "char_uv_start" set Vec2f(q.s0(), q.t0())
+                    "char_uv_end" set Vec2f(q.s1(), q.t1())
+                }
 
                 val sp = STBTruetype.stbtt_ScaleForPixelHeight(font.info, fontHeight)
 
                 val yy = lineI * ((font.ascent - font.descent + font.lineGap) * sp + fontHeight / 2f) * p
 
-                renderer.renderQuad(window, QuadShader(shader), position.x + x0 * 2, -(position.y + yy + y0), x1 - x0, y1 - y0)
+                renderer.renderQuad(window, QuadShader(shader), position.x + x0 * 2, -(position.y + yy + y0 + fontHeight * p), x1 - x0, y1 - y0)
             }
         }
     }

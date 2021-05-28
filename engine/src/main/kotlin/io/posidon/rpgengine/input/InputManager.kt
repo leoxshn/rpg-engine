@@ -1,8 +1,6 @@
-package io.posidon.rpgengine.events
+package io.posidon.rpgengine.input
 
 import io.posidon.game.shared.types.Vec2f
-import io.posidon.rpgengine.input.Action
-import io.posidon.rpgengine.input.Key
 import io.posidon.rpgengine.util.set
 import io.posidon.rpgengine.window.Window
 import org.lwjgl.glfw.GLFW

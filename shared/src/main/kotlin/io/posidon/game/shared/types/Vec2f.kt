@@ -39,7 +39,8 @@ data class Vec2f(var x: Float, var y: Float) {
     inline operator fun times(other: Vec2f) = Vec2f(x * other.x, y * other.y)
     inline operator fun times(other: Float) = Vec2f(x * other, y * other)
     inline operator fun div(other: Vec2f) = Vec2f(x / other.x, y / other.y)
-    inline operator fun div(float: Float) = Vec2f(x / float, y / float)
+    inline operator fun div(d: Float) = Vec2f(x / d, y / d)
+    inline operator fun div(d: Int) = Vec2f(x / d, y / d)
     inline fun normalize() = if (length == 0f) Vec2f(0f, 0f) else this / length
     inline fun dot(other: Vec2f) = x * other.x + y * other.y
 

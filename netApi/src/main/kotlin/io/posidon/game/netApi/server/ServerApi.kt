@@ -7,11 +7,9 @@ import io.posidon.game.netApi.PacketTypes
 
 object ServerApi {
 
-    fun init(x: Float, y: Float, h: Int, blockDictionary: String, sizeInChunks: Int): Packet = Packet.make(PacketTypes.INIT, blockDictionary, x, y, h, sizeInChunks)
+    fun init(x: Float, y: Float, sizeInChunks: Int): Packet = Packet.make(PacketTypes.INIT, x, y, sizeInChunks)
 
-    fun block(x: Int, y: Int, h: Int, id: Int): Packet = Packet.make(PacketTypes.SET_BLOCK, x, y, h, id)
-
-    fun position(x: Int, y: Int, h: Int): Packet = Packet.make(PacketTypes.POSITION, x, y, h)
+    fun position(x: Int, y: Int): Packet = Packet.make(PacketTypes.POSITION, x, y)
 
     fun time(time: Double): Packet = Packet.make(PacketTypes.TIME, time)
 
@@ -20,7 +18,5 @@ object ServerApi {
         if (private) Compressor.compressString("$sender$SEPARATOR$message", 2048)
         else "$sender$SEPARATOR$message")
 
-    fun chunk(x: Int, y: Int, dataString: String?): Packet = if (dataString == null)
-        Packet.make(PacketTypes.CHUNK, x, y, "")
-    else Packet.make(PacketTypes.CHUNK, x, y, dataString)
+    fun chunk(x: Int, y: Int, dataString: String): Packet = Packet.make(PacketTypes.CHUNK, x, y, dataString)
 }

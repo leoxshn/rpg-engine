@@ -16,12 +16,6 @@ object ReceivedPacketHandler {
                     position.set(p)
                 }
             }
-            PacketTypes.BREAK_BLOCK -> {
-                val (x, y, h) = packet.parseIntCoords()
-                try {
-                    World.breakBlock(player, x, y, h)
-                } catch (e: Exception) { e.print() }
-            }
             else -> Console.beforeCmdLine {
                 Console.printProblem(player.name, " sent an unknown packet: $packet")
             }

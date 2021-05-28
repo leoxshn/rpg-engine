@@ -20,16 +20,10 @@ class ClientNode(val world: World) : Node() {
                 client.send(ClientApi.auth("leoxshn", "w04m58cyp49y59ti5ts9io3k"))
                 val line = client.waitForPacket(INIT)
                 val tokens = line.split('&')
-                val defs = tokens[1].split(',')
-                for (def in defs) {
-                    val eqI = def.indexOf('=')
-                    world.blockDictionary[def.substring(0, eqI).toInt()] = def.substring(eqI + 1)
-                }
-                val x = tokens[2].toFloat()
-                val y = tokens[3].toFloat()
-                val h = tokens[4].toInt()
-                world.player.position.set(x, y, h)
-                world.initWorld(tokens[5].toInt())
+                val x = tokens[1].toFloat()
+                val y = tokens[2].toFloat()
+                world.player.position.set(x, y)
+                world.initWorld(tokens[3].toInt())
             } else log.e("Couldn't connect to server")
         }
         client.startAsync(onPacketReceived = ::onPacketReceived)
@@ -42,8 +36,6 @@ class ClientNode(val world: World) : Node() {
     fun onPacketReceived(packet: Packet) {
         when (packet.type) {
             PacketTypes.CHUNK -> world.onChunkReceived(packet)
-            PacketTypes.SET_BLOCK -> world.onSetBlockReceived(packet)
-            PacketTypes.TIME -> world.updateTime(packet.parseTime())
             else -> world.player.onPacketReceived(packet)
         }
     }

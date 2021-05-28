@@ -4,7 +4,6 @@ import org.lwjgl.PointerBuffer
 import org.lwjgl.system.MemoryUtil
 import java.nio.FloatBuffer
 import java.nio.IntBuffer
-import java.util.*
 
 class NativeFloatList (var buffer: FloatBuffer) {
 
@@ -15,7 +14,7 @@ class NativeFloatList (var buffer: FloatBuffer) {
         else MemoryUtil.memRealloc(buffer, buffer.capacity() + 256).put(v).also { buffer = it }
 
     inline fun toFloatArray(): FloatArray {
-        return if (buffer.hasArray()) Arrays.copyOf(buffer.array(), size)
+        return if (buffer.hasArray()) buffer.array().copyOf(size)
         else FloatArray(buffer.position()) { buffer[it] }
     }
 
@@ -36,7 +35,7 @@ class NativeIntList (var buffer: IntBuffer) {
         else MemoryUtil.memRealloc(buffer, buffer.capacity() + 256).put(v).also { buffer = it }
 
     inline fun toIntArray(): IntArray {
-        return if (buffer.hasArray()) Arrays.copyOf(buffer.array(), size)
+        return if (buffer.hasArray()) buffer.array().copyOf(size)
         else IntArray(buffer.position()) { buffer[it] }
     }
 

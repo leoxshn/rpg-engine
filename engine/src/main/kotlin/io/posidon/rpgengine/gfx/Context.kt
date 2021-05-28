@@ -37,17 +37,5 @@ inline class QuadShader(val shader: Shader): Shader {
     override fun destroy() = shader.destroy()
 }
 
-inline class ScreenShader(val shader: Shader): Shader {
-    override fun set(name: String, value: Float) = shader.set(name, value)
-    override fun set(name: String, value: Int) = shader.set(name, value)
-    override fun set(name: String, value: Boolean) = shader.set(name, value)
-    override fun set(name: String, value: Vec2f) = shader.set(name, value)
-    override fun set(name: String, value: Vec3f) = shader.set(name, value)
-    override fun set(name: String, value: Vec3i) = shader.set(name, value)
-    override fun set(name: String, value: Mat4f) = shader.set(name, value)
-    override fun bind() = shader.bind()
-    override fun destroy() = shader.destroy()
-}
-
 inline fun Context.loadQuadShader(log: MainLogger, fragmentPath: String): QuadShader = QuadShader(loadShader(log, fragmentPath, "/shaders/quad.vsh"))
-inline fun Context.loadScreenShader(log: MainLogger, fragmentPath: String): ScreenShader = ScreenShader(loadShader(log, fragmentPath, "/shaders/fullscreen.vsh"))
+inline fun Context.loadScreenShader(log: MainLogger, fragmentPath: String): Shader = loadShader(log, fragmentPath, "/shaders/fullscreen.vsh")

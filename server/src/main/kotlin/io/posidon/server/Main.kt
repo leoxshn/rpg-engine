@@ -5,7 +5,6 @@ import io.posidon.game.netApi.server.ServerApi
 import io.posidon.game.shared.ConsoleColors
 import io.posidon.server.cli.Console
 import io.posidon.server.net.Player
-import io.posidon.game.netApi.world.Block
 import io.posidon.server.world.World
 import java.io.IOException
 
@@ -20,11 +19,7 @@ fun main(args: Array<String>) {
 	Server.start {
 		Player(it).also { player ->
 			player.init()
-			player.send(ServerApi.init(0f, World.getDefaultSpawnPosition().toFloat(), 0, buildString {
-				for (value in Block.values())
-					append(value.ordinal).append('=').append(value.id).append(',')
-				deleteCharAt(lastIndex)
-			}, World.sizeInChunks))
+			player.send(ServerApi.init(0f, 0f, World.sizeInChunks))
 			Console.beforeCmdLine {
 				Console.printInfo(player.name, " joined the server")
 			}

@@ -18,18 +18,35 @@ interface Shader {
     fun destroy()
 }
 
-operator fun Shader.set(name: String, value: IntArray) {
-    for (i in value.indices) set("$name[$i]", value[i])
+@JvmInline
+value class Uniforms(val shader: Shader) {
+
+    inline infix fun String.set(value: Float) = shader.set(this, value)
+    inline infix fun String.set(value: Int) = shader.set(this, value)
+    inline infix fun String.set(value: Boolean) = shader.set(this, value)
+    inline infix fun String.set(value: Vec2f) = shader.set(this, value)
+    inline infix fun String.set(value: Vec3f) = shader.set(this, value)
+    inline infix fun String.set(value: Vec3i) = shader.set(this, value)
+    inline infix fun String.set(value: Mat4f) = shader.set(this, value)
+
+    inline infix fun String.set(value: IntArray) {
+        for (i in value.indices) "$this[$i]" set value[i]
+    }
+    inline infix fun String.set(value: FloatArray) {
+        for (i in value.indices) "$this[$i]" set value[i]
+    }
+    inline infix fun String.set(value: BooleanArray) {
+        for (i in value.indices) "$this[$i]" set value[i]
+    }
+    inline infix fun String.set(value: Array<Vec2f>) {
+        for (i in value.indices) "$this[$i]" set value[i]
+    }
+    inline infix fun String.set(value: Array<Vec3f>) {
+        for (i in value.indices) "$this[$i]" set value[i]
+    }
 }
-operator fun Shader.set(name: String, value: FloatArray) {
-    for (i in value.indices) set("$name[$i]", value[i])
-}
-operator fun Shader.set(name: String, value: BooleanArray) {
-    for (i in value.indices) set("$name[$i]", value[i])
-}
-operator fun Shader.set(name: String, value: Array<Vec2f>) {
-    for (i in value.indices) set("$name[$i]", value[i])
-}
-operator fun Shader.set(name: String, value: Array<Vec3f>) {
-    for (i in value.indices) set("$name[$i]", value[i])
+
+inline operator fun Shader.invoke(block: Uniforms.() -> Unit) {
+    bind()
+    block(Uniforms(this))
 }

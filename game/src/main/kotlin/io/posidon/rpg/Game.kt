@@ -12,11 +12,12 @@ class Game : Application() {
     override fun createWindow(args: Array<String>) = window(
         width = 800,
         height = 560,
-        title = "rpg"
+        title = "resource gathering game"
     )
 
     override fun init(args: Array<String>) {
-        renderer.setClearColor(.2f, .2f, .2f)
+        renderer.setClearColor(0f, 0f, 0f)
+        targetFPS = 60
     }
 }
 

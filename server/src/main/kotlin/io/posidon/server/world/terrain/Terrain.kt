@@ -1,19 +1,15 @@
 package io.posidon.server.world.terrain
 
 import io.posidon.game.shared.types.Vec2i
-import io.posidon.server.world.Chunk
 import io.posidon.server.net.Player
-import io.posidon.game.netApi.world.Block
 import io.posidon.server.world.World
-import io.posidon.server.world.WorldSaver
 import java.util.*
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.thread
 
 class Terrain(
     seed: Long,
-    val sizeInChunks: Int,
-    val saver: WorldSaver
+    val sizeInChunks: Int
 ) {
 
     inline val sizeInVoxels get() = sizeInChunks * Chunk.SIZE
@@ -22,23 +18,18 @@ class Terrain(
 
     val generator = WorldGenerator(seed, sizeInVoxels)
 
-    fun getHeight(x: Int, z: Int): Int = generator.getHeight(x, z)
-
     private val chunkLock = ReentrantLock()
 
     private val unsafeChunkAccessor = UnsafeChunkAccessor(this)
     private val safeChunkAccessor = SafeChunkAccessor(this)
 
-    fun getBlock(x: Int, y: Int, h: Int): Block? {
-        return getChunk(
-            x / Chunk.SIZE, y / Chunk.SIZE
-        )[x % Chunk.SIZE, y % Chunk.SIZE, h % Chunk.HEIGHT]
+    fun probe(x: Int, y: Int): Probe {
+        val chunk = getChunk(x / Chunk.SIZE, y / Chunk.SIZE)
+        return chunk.probe(x % Chunk.SIZE, y % Chunk.SIZE)
     }
 
-    fun setBlock(x: Int, y: Int, h: Int, block: Block?) {
-        getChunk(
-            x / Chunk.SIZE, y / Chunk.SIZE
-        )[x % Chunk.SIZE, y % Chunk.SIZE, h % Chunk.HEIGHT] = block
+    fun set(x: Int, y: Int, probe: Probe) {
+        getChunk(x / Chunk.SIZE, y / Chunk.SIZE).set(x % Chunk.SIZE, y % Chunk.SIZE, probe)
     }
 
     fun getChunk(x: Int, y: Int): Chunk {
@@ -49,52 +40,6 @@ class Terrain(
         chunkLock.lock()
         block(unsafeChunkAccessor)
         chunkLock.unlock()
-    }
-
-    fun generateAndSaveAllChunks() {
-        /*
-        val allChunks = sizeInChunks * sizeInChunks * heightInChunks
-        var currentChunks = 0
-        Console.beforeCmdLine {
-            Console.println(Console.colors.BLUE_BRIGHT + "Loading chunks...")
-        }
-        val threads = LinkedList<Thread>()
-        for (x in 0 until sizeInChunks) {
-            threads.add(thread {
-                for (z in 0 until sizeInChunks) {
-                    for (y in 0 until heightInChunks) {
-                        if (!saver.hasChunk(x, y, z)) {
-                            saver.saveChunk(x, y, z, generator.genChunk(x, y, z))
-                        }
-                        currentChunks++
-                    }
-                }
-                Console.beforeCmdLine {
-                    Console.printInfo((currentChunks * 100 / (allChunks)).toString() + "% chunks loaded", " ($currentChunks out of $allChunks)")
-                }
-            })
-        }
-        threads.forEach { it.join() }
-        Console.beforeCmdLine {
-            Console.println(Console.colors.GREEN_BOLD_BRIGHT + "Done loading chunks!")
-        }*/
-
-        run {
-            print("test")
-            val s = System.currentTimeMillis()
-            val threads = LinkedList<Thread>()
-            for (x in 0 until sizeInChunks) {
-                threads.add(thread {
-                    for (z in 0 until sizeInChunks) for (y in 0 until sizeInChunks) {
-                        generator.genChunk(x, y)
-                        print('.')
-                    }
-                })
-            }
-            threads.forEach { it.join() }
-            val t = System.currentTimeMillis() - s
-            println("test end: $t")
-        }
     }
 
     fun sendChunk(player: Player, accessor: ChunkAccessor, x: Int, y: Int) {
@@ -162,26 +107,15 @@ class Terrain(
 
         inline fun getChunk(chunkPos: Vec2i): Chunk = getChunk(chunkPos.x, chunkPos.y)
         inline fun getChunk(x: Int, y: Int): Chunk {
-            return getExistingChunk(x, y) ?: genChunk(x, y)
-        }
-
-        inline fun getExistingChunk(x: Int, y: Int): Chunk? {
-            return getLoadedChunk(x, y) ?: getSavedChunk(x, y)
+            return getLoadedChunk(x, y) ?: genChunk(x, y)
         }
 
         abstract fun genChunk(x: Int, y: Int): Chunk
-        abstract fun getSavedChunk(x: Int, y: Int): Chunk?
     }
 
     class UnsafeChunkAccessor(terrain: Terrain) : ChunkAccessor(terrain) {
         override fun genChunk(x: Int, y: Int): Chunk {
             return terrain.generator.genChunk(x, y).also {
-                setLoadedChunk(x, y, it)
-                terrain.saver.saveChunk(x, y, it)
-            }
-        }
-        override fun getSavedChunk(x: Int, y: Int): Chunk? {
-            return terrain.saver.loadChunk(x, y)?.also {
                 setLoadedChunk(x, y, it)
             }
         }
@@ -190,14 +124,6 @@ class Terrain(
     class SafeChunkAccessor(terrain: Terrain) : ChunkAccessor(terrain) {
         override fun genChunk(x: Int, y: Int): Chunk {
             return terrain.generator.genChunk(x, y).also {
-                terrain.chunkLock.lock()
-                setLoadedChunk(x, y, it)
-                terrain.saver.saveChunk(x, y, it)
-                terrain.chunkLock.unlock()
-            }
-        }
-        override fun getSavedChunk(x: Int, y: Int): Chunk? {
-            return terrain.saver.loadChunk(x, y)?.also {
                 terrain.chunkLock.lock()
                 setLoadedChunk(x, y, it)
                 terrain.chunkLock.unlock()

@@ -1,10 +1,10 @@
 package io.posidon.rpgengine
 
 import io.posidon.rpgengine.debug.MainLogger
-import io.posidon.rpgengine.events.InputManager
+import io.posidon.rpgengine.input.InputManager
 import io.posidon.rpgengine.gfx.Context
+import io.posidon.rpgengine.gfx.FrameSynchronizer
 import io.posidon.rpgengine.gfx.getContext
-import io.posidon.rpgengine.gfx.assets.Texture
 import io.posidon.rpgengine.gfx.renderer.Renderer
 import io.posidon.rpgengine.scene.Scene
 import io.posidon.rpgengine.window.Window
@@ -23,8 +23,16 @@ abstract class Application {
 
     abstract val scene: Scene
 
+    var targetFPS = 60
+
     protected abstract fun createWindow(args: Array<String>): WindowCreationData
     protected abstract fun init(args: Array<String>)
+
+    fun window(
+        width: Int,
+        height: Int,
+        title: String? = null
+    ) = WindowCreationData(width, height, title)
 
     fun start(args: Array<String>) {
         Window.init()
@@ -50,12 +58,16 @@ abstract class Application {
                 }
             }
         }
-        while (!window.shouldClose) {
-            window.pollEvents()
-            renderer.preRender()
-            scene.render(window)
-            renderer.postRender()
-            window.swapBuffers()
+        run {
+            frameSynchronizer.init()
+            while (!window.shouldClose) {
+                window.pollEvents()
+                renderer.preRender()
+                scene.render(window)
+                renderer.postRender()
+                window.swapBuffers()
+                frameSynchronizer.sync(targetFPS)
+            }
         }
         running = false
         scene.destroy()
@@ -63,9 +75,5 @@ abstract class Application {
         window.destroy()
     }
 
-    fun window(
-        width: Int,
-        height: Int,
-        title: String? = null
-    ) = WindowCreationData(width, height, title)
+    private val frameSynchronizer = FrameSynchronizer()
 }

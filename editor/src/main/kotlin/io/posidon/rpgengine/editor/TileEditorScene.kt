@@ -5,6 +5,8 @@ import io.posidon.rpgengine.scene.SceneChildrenBuilder
 
 class TileEditorScene : Scene() {
     override fun SceneChildrenBuilder.build() {
-        - TileBitmaskEditView()
+        uiLayer {
+            - TileBitmaskEditView()
+        }
     }
 }

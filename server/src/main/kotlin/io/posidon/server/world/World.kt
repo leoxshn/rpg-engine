@@ -1,12 +1,12 @@
 package io.posidon.server.world
 
-import io.posidon.game.netApi.server.ServerApi
 import io.posidon.game.shared.types.Vec2f
 import io.posidon.game.shared.types.Vec2i
 import io.posidon.server.Server
 import io.posidon.server.cli.Console
 import io.posidon.server.loop
 import io.posidon.server.net.Player
+import io.posidon.server.world.terrain.Chunk
 import io.posidon.server.world.terrain.Terrain
 import kotlin.concurrent.thread
 
@@ -15,11 +15,9 @@ object World {
     val sizeInChunks: Int = 16
 
     private lateinit var terrain: Terrain
-    private val saver = WorldSaver("world")
 
     fun init(seed: Long) {
-        terrain = Terrain(seed, sizeInChunks, saver)
-        //terrain.generateAndSaveAllChunks()
+        terrain = Terrain(seed, sizeInChunks)
         thread {
             var lastTime: Long = System.nanoTime()
             var delta = 0.0
@@ -36,7 +34,7 @@ object World {
                                         val r = Vec2f(x.toFloat() * Chunk.SIZE, y.toFloat() * Chunk.SIZE)
                                         var shouldDelete = true
                                         for (player in Server.players) {
-                                            if (r.apply { selfSubtract(player.position.xy) }.length < deletionDistance) {
+                                            if (r.apply { selfSubtract(player.position) }.length < deletionDistance) {
                                                 shouldDelete = false
                                                 break
                                             } else {
@@ -70,15 +68,5 @@ object World {
         val r = 2
 
         terrain.sendChunksIncrementally(player, xx, yy, r)
-    }
-
-    fun getDefaultSpawnPosition(): Int {
-        terrain.getChunk(0, 0)
-        return terrain.getHeight(0, 0) + 5
-    }
-
-    fun breakBlock(player: Player, x: Int, y: Int, h: Int) {
-        terrain.setBlock(x, y, h, null)
-        player.send(ServerApi.block(x, y, h, -1))
     }
 }

@@ -5,12 +5,11 @@ import io.posidon.game.netApi.server.ServerApi
 import io.posidon.game.netApi.server.player.ServerPlayer
 import io.posidon.game.netApi.util.Compressor
 import io.posidon.game.shared.Format
-import io.posidon.game.shared.types.Position
 import io.posidon.game.shared.types.Vec2f
 import io.posidon.game.shared.types.Vec2i
-import io.posidon.server.world.Chunk
 import io.posidon.server.cli.Console
 import io.posidon.server.world.World
+import io.posidon.server.world.terrain.Chunk
 import java.net.Socket
 import java.util.concurrent.ConcurrentLinkedQueue
 import kotlin.concurrent.thread
@@ -25,13 +24,13 @@ class Player(
 
     fun triggerTickEvent(it: Player.() -> Unit) = tickEventQueue.add(it)
 
-    val position = Position.zero()
+    val position = Vec2f.zero()
 
     var moveSpeed = 0.5f
     var jumpHeight = 0.5f
 
     fun sendChunk(chunkPos: Vec2i, chunk: Chunk) {
-        send(ServerApi.chunk(chunkPos.x, chunkPos.y, chunk.makePacketString()?.let { Format.newLineUnescape(Compressor.compressString(it, Chunk.VOLUME * 6)) }))
+        send(ServerApi.chunk(chunkPos.x, chunkPos.y, chunk.makePacketString().let { Format.newLineUnescape(Compressor.compressString(it, 1024 * 6)) }))
         sentChunks.add(chunkPos)
     }
 

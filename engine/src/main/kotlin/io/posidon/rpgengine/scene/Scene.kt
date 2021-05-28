@@ -1,28 +1,44 @@
 package io.posidon.rpgengine.scene
 
 import io.posidon.rpgengine.debug.MainLogger
-import io.posidon.rpgengine.events.InputManager
-import io.posidon.rpgengine.gfx.Context
+import io.posidon.rpgengine.input.InputManager
+import io.posidon.rpgengine.gfx.*
 import io.posidon.rpgengine.gfx.renderer.Renderer
 import io.posidon.rpgengine.scene.node.Node
 import io.posidon.rpgengine.window.Window
 
-abstract class Scene {
+abstract class Scene : ContextInitialized<Scene>() {
 
     protected abstract fun SceneChildrenBuilder.build()
 
-    lateinit var log: MainLogger
-        private set
-    lateinit var context: Context
-        private set
     lateinit var window: Window
         private set
     lateinit var input: InputManager
         private set
-    lateinit var children: Array<Node>
+
+    lateinit var layers: Array<Layer>
         private set
 
-    private lateinit var renderer: Renderer
+    class Layer(
+        val renderer: Renderer,
+        val children: Array<Node>
+    ) {
+        fun init() {
+            children.forEach(Node::init)
+        }
+
+        fun render(window: Window) {
+            children.forEach { it.render(renderer, window) }
+        }
+
+        fun update(delta: Float) {
+            children.forEach { it.update(delta) }
+        }
+
+        fun destroy() {
+            children.forEach(Node::destroy)
+        }
+    }
 
     internal fun internalInit(
         log: MainLogger,
@@ -31,31 +47,35 @@ abstract class Scene {
         window: Window,
         input: InputManager
     ) {
-        this.log = log
-        this.context = context
         this.window = window
         this.input = input
+        super.internalInit(log, context)
 
-        val b = SceneChildrenBuilder(renderer).apply { build() }
-        val c = b.nodes
-        children = Array(c.size) {
-            c[it].apply {
-                this.internalInit(log, context, input)
-            }
+        val b = SceneChildrenBuilder(renderer, window).apply { build() }
+        layers = Array(b.layers.size) {
+            val l = b.layers[it]
+            val c = l.nodes
+            Layer(
+                renderer = l.renderer,
+                children = Array(c.size) {
+                    c[it].apply {
+                        this.internalInit(log, context, input)
+                    }
+                }
+            )
         }
-        this.renderer = b.renderer
-        children.forEach(Node::init)
+        layers.forEach(Layer::init)
     }
 
     fun render(window: Window) {
-        children.forEach { it.render(renderer, window) }
+        layers.forEach { it.render(window) }
     }
 
     fun update(delta: Float) {
-        children.forEach { it.update(delta) }
+        layers.forEach { it.update(delta) }
     }
 
     fun destroy() {
-        children.forEach(Node::destroy)
+        layers.forEach(Layer::destroy)
     }
 }
