@@ -47,7 +47,9 @@ open class ChunkMap <K> (val isLoaded: (K) -> Boolean) : Node() {
         fun add(node: Node) {
             nodes.add(node)
             if (map.initialized) {
-                node.internalInit(map.log, map.context, map.input)
+                map.onRenderThread {
+                    node.internalInit(map.log, map.context, map.input)
+                }
             }
         }
 

@@ -15,11 +15,11 @@ class Camera2D(
 
     val renderer = object : ModifiedRenderer {
         override val renderer = renderer
-        override fun renderQuad(window: Window, quadShader: QuadShader, x: Float, y: Float, width: Float, height: Float) {
-            renderer.renderQuad(window, quadShader, x - xy.x, y - xy.y, width, height)
+        override fun renderQuad(window: Window, quadShader: QuadShader, x: Float, y: Float, z: Float, width: Float, height: Float, depth: Float, rotationX: Float, rotationY: Float, rotationZ: Float) {
+            renderer.renderQuad(window, quadShader, x - xy.x, y - xy.y, z, width, height, depth, rotationX, rotationY, rotationZ)
         }
-        override fun renderMesh(mesh: Mesh, window: Window, shader: QuadShader, x: Float, y: Float, scaleX: Float, scaleY: Float) {
-            renderer.renderMesh(mesh, window, shader, x - xy.x, y - xy.y, scaleX, scaleY)
+        override fun renderMesh(mesh: Mesh, window: Window, shader: QuadShader, x: Float, y: Float, z: Float, scaleX: Float, scaleY: Float, scaleZ: Float, rotationX: Float, rotationY: Float, rotationZ: Float) {
+            renderer.renderMesh(mesh, window, shader, x - xy.x, y - xy.y, z, scaleX, scaleY, scaleZ, rotationX, rotationY, rotationZ)
         }
     }
 

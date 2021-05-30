@@ -1,13 +1,11 @@
-package io.posidon.rpg.world
+package io.posidon.rpg.client.world
 
-import io.posidon.game.netApi.Packet
 import io.posidon.game.shared.types.Vec2f
-import io.posidon.rpg.Player
+import io.posidon.rpg.server.Server
 import io.posidon.rpgengine.Global
 import io.posidon.rpgengine.scene.Scene
 import io.posidon.rpgengine.scene.SceneChildrenBuilder
 import io.posidon.rpgengine.scene.node.container.ChunkMap2D
-import io.posidon.rpgengine.scene.node.container.plusAssign
 import io.posidon.rpgengine.scene.node.util.FpsCounter
 
 class World : Scene() {
@@ -27,7 +25,7 @@ class World : Scene() {
 
     override fun SceneChildrenBuilder.build() {
         camera2DLayer(player.position) {
-            postprocessing("/shaders/filter.fsh", 1) {
+            postprocessing("/shaders/filter.fsh", 1, minWidth = 512) {
                 shader {
                     "millis" set Global.millis().toFloat()
                 }
@@ -35,7 +33,7 @@ class World : Scene() {
                 - player
             }
             - camera
-            - ClientNode(this@World)
+            - Server(chunkMap, player)
         }
         uiLayer {
             - FpsCounter(
@@ -44,21 +42,5 @@ class World : Scene() {
                 jetBrainsMono
             )
         }
-    }
-
-    init {
-        chunkMap += EntityNode(Vec2f.zero())
-        chunkMap += EntityNode(Vec2f(3f, 2f))
-        chunkMap += EntityNode(Vec2f(5f, 12f))
-    }
-
-    fun initWorld(sizeInChunks: Int) {
-
-    }
-
-    fun onChunkReceived(packet: Packet) {
-        val x = packet.tokens[1].toInt()
-        val y = packet.tokens[2].toInt()
-        var isChunkNew = false
     }
 }

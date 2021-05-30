@@ -11,9 +11,9 @@ import io.posidon.rpgengine.window.Window
 interface ModifiedRenderer : Renderer {
     val renderer: Renderer
 
-    override fun renderQuad(window: Window, quadShader: QuadShader, x: Float, y: Float, width: Float, height: Float) = renderer.renderQuad(window, quadShader, x, y, width, height)
+    override fun renderQuad(window: Window, quadShader: QuadShader, x: Float, y: Float, z: Float, width: Float, height: Float, depth: Float, rotationX: Float, rotationY: Float, rotationZ: Float) = renderer.renderQuad(window, quadShader, x, y, z, width, height, depth, rotationX, rotationY, rotationZ)
     override fun renderScreen(window: Window, shader: Shader) = renderer.renderScreen(window, shader)
-    override fun renderMesh(mesh: Mesh, window: Window, shader: QuadShader, x: Float, y: Float, scaleX: Float, scaleY: Float) = renderer.renderMesh(mesh, window, shader, x, y, scaleX, scaleY)
+    override fun renderMesh(mesh: Mesh, window: Window, shader: QuadShader, x: Float, y: Float, z: Float, scaleX: Float, scaleY: Float, scaleZ: Float, rotationX: Float, rotationY: Float, rotationZ: Float) = renderer.renderMesh(mesh, window, shader, x, y, z, scaleX, scaleY, scaleZ, rotationX, rotationY, rotationZ)
     override fun preWindowInit() = renderer.preWindowInit()
     override fun init(log: MainLogger, window: Window) = renderer.init(log, window)
     override fun onWindowResize(width: Int, height: Int) = renderer.onWindowResize(width, height)

@@ -8,10 +8,10 @@ class UIRenderer(
     override val renderer: Renderer,
 ) : ModifiedRenderer {
 
-    override fun renderQuad(window: Window, quadShader: QuadShader, x: Float, y: Float, width: Float, height: Float) {
-        renderer.renderQuad(window, quadShader, x - window.widthInTiles, y + window.heightInTiles, width, height)
+    override fun renderQuad(window: Window, quadShader: QuadShader, x: Float, y: Float, z: Float, width: Float, height: Float, depth: Float, rotationX: Float, rotationY: Float, rotationZ: Float) {
+        renderer.renderQuad(window, quadShader, x - window.widthInTiles, y + window.heightInTiles, z, width, height, depth, rotationX, rotationY, rotationZ)
     }
-    override fun renderMesh(mesh: Mesh, window: Window, shader: QuadShader, x: Float, y: Float, scaleX: Float, scaleY: Float) {
-        renderer.renderMesh(mesh, window, shader, x - window.widthInTiles, y + window.heightInTiles, scaleX, scaleY)
+    override fun renderMesh(mesh: Mesh, window: Window, shader: QuadShader, x: Float, y: Float, z: Float, scaleX: Float, scaleY: Float, scaleZ: Float, rotationX: Float, rotationY: Float, rotationZ: Float) {
+        renderer.renderMesh(mesh, window, shader, x - window.widthInTiles, y + window.heightInTiles, z, scaleX, scaleY, scaleZ, rotationX, rotationY, rotationZ)
     }
 }

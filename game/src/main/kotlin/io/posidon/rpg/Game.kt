@@ -1,6 +1,6 @@
 package io.posidon.rpg
 
-import io.posidon.rpg.world.World
+import io.posidon.rpg.client.world.World
 import io.posidon.rpgengine.Application
 import io.posidon.rpgengine.scene.Scene
 import io.posidon.rpgengine.gfx.renderer.setClearColor

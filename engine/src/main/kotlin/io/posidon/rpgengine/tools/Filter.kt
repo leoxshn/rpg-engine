@@ -1,5 +1,6 @@
 package io.posidon.rpgengine.tools
 
+import io.posidon.game.shared.types.Vec2i
 import io.posidon.rpgengine.gfx.assets.Uniforms
 import io.posidon.rpgengine.gfx.assets.invoke
 import io.posidon.rpgengine.gfx.loadQuadShader
@@ -19,6 +20,7 @@ class Filter internal constructor(
     window: Window,
     fragmentPath: String,
     colorBufferCount: Int,
+    val minWidth: Int,
     val uniforms: Uniforms.() -> Unit,
     nodes: LinkedList<Node>
 ) : NodeGroup(nodes), FrameBuffer {
@@ -27,20 +29,39 @@ class Filter internal constructor(
 
     private val id = createFrameBuffer()
 
-    private val attachments = Array(colorBufferCount + 1) {
-        if (it < colorBufferCount) {
-            renderer.createColorBuffer(it, window.width, window.height)
-        } else renderer.createDepthBuffer(window.width, window.height)
-    }.apply {
-        forEach(Renderer.Buffer::init)
-        GL20.glDrawBuffers(IntArray(colorBufferCount) {
-            GL30.GL_COLOR_ATTACHMENT0 + it
-        })
+    fun calculateBufferSize(window: Window, minWidth: Int): Vec2i {
+        val w: Int
+        val h: Int
+        if (window.width > window.height) {
+            h = minWidth
+            w = minWidth * window.width / window.height
+        } else {
+            w = minWidth
+            h = minWidth * window.height / window.width
+        }
+        return Vec2i(w, h)
+    }
+
+    private val attachments = run {
+        val (w, h) = calculateBufferSize(window, minWidth)
+        Array(colorBufferCount + 1) {
+            if (it < colorBufferCount) {
+                renderer.createColorBuffer(it, w, h)
+            } else renderer.createDepthBuffer(w, h)
+        }.apply {
+            forEach(Renderer.Buffer::init)
+            GL20.glDrawBuffers(IntArray(colorBufferCount) {
+                GL30.GL_COLOR_ATTACHMENT0 + it
+            })
+        }
     }
 
     init {
         window.addResizeListener { _, width, height ->
-            attachments.forEach { it.resize(width, height) }
+            attachments.forEach {
+                val (w, h) = calculateBufferSize(window, minWidth)
+                it.resize(w, h)
+            }
         }
     }
 

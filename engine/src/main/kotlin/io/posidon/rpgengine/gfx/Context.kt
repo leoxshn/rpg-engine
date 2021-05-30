@@ -19,6 +19,8 @@ interface Context {
     fun makeMesh(indices: IntArray, vararg vbos: Mesh.VBO): Mesh
     fun makeVBO(size: Int, vararg floats: Float): Mesh.VBO
     fun loadTTF(log: MainLogger, path: String): Font
+    fun runOnRenderThread(function: () -> Unit)
+    fun handleOnRenderFunctions()
 }
 
 internal fun getContext() = OpenGLContext

@@ -24,6 +24,10 @@ abstract class ContextInitialized <SELF : ContextInitialized<SELF>> {
         context.makeMesh(indices, *creator.vbos.toTypedArray())
     }
 
+    fun onRenderThread(function: () -> Unit) {
+        context.runOnRenderThread(function)
+    }
+
     fun <T : Any> onInit(block: SELF.() -> T): Lazy<T> {
         return OnReadyProperty(this, block).also { onInitValues.add(it) }
     }

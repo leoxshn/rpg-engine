@@ -23,6 +23,7 @@ import org.lwjgl.stb.STBTruetype
 import java.io.FileNotFoundException
 import java.nio.ByteBuffer
 import java.nio.IntBuffer
+import java.util.*
 import kotlin.math.min
 
 
@@ -177,5 +178,15 @@ object OpenGLContext : Context {
             val texture = OpenGLTexture(texID, Font.BITMAP_WIDTH, Font.BITMAP_HEIGHT)
             Font(texture, info, pAscent[0], pDescent[0], pLineGap[0], charData, ttfBuffer)
         }
+    }
+
+    private val onRenderFunctions = LinkedList<() -> Unit>()
+    override fun runOnRenderThread(function: () -> Unit) {
+        onRenderFunctions += function
+    }
+
+    override fun handleOnRenderFunctions() {
+        while (onRenderFunctions.isNotEmpty())
+            onRenderFunctions.pop()()
     }
 }

@@ -4,8 +4,8 @@ import io.posidon.game.shared.types.Vec2f
 import io.posidon.rpgengine.gfx.QuadShader
 import io.posidon.rpgengine.gfx.assets.Font
 import io.posidon.rpgengine.gfx.assets.invoke
-import io.posidon.rpgengine.gfx.loadQuadShader
 import io.posidon.rpgengine.gfx.renderer.Renderer
+import io.posidon.rpgengine.gfx.renderer.renderQuad2D
 import io.posidon.rpgengine.scene.Positional
 import io.posidon.rpgengine.scene.node.Node
 import io.posidon.rpgengine.util.Stack
@@ -77,7 +77,7 @@ class Text(
 
                 val yy = lineI * ((font.ascent - font.descent + font.lineGap) * sp + fontHeight / 2f) * p
 
-                renderer.renderQuad(window, QuadShader(shader), position.x + x0 * 2, -(position.y + yy + y0 + fontHeight * p), x1 - x0, y1 - y0)
+                renderer.renderQuad2D(window, QuadShader(shader), position.x + x0 * 2, -(position.y + yy + y0 + fontHeight * p), x1 - x0, y1 - y0)
             }
         }
     }

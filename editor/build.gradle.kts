@@ -15,7 +15,6 @@ repositories {
 dependencies {
     implementation(kotlin("stdlib"))
     implementation(project(":engine"))
-    implementation(project(":netApi"))
     implementation(project(":shared"))
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.0")

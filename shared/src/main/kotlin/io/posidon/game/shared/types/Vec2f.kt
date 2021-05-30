@@ -18,6 +18,7 @@ data class Vec2f(var x: Float, var y: Float) {
     }
 
     override fun hashCode() = Objects.hash(x, y)
+    fun longUID() = x.toRawBits().toLong() shl 32 or x.toRawBits().toLong()
     override fun toString() = "vec2f($x, $y)"
     inline fun toVec2i() = Vec2i(x.toInt(), y.toInt())
 
@@ -33,6 +34,8 @@ data class Vec2f(var x: Float, var y: Float) {
     }
 
     inline val length get() = sqrt(x * x + y * y)
+
+    inline val isZero get() = x == 0f && y == 0f
 
     inline operator fun plus(other: Vec2f) = Vec2f(x + other.x, y + other.y)
     inline operator fun minus(other: Vec2f) = Vec2f(x - other.x, y - other.y)

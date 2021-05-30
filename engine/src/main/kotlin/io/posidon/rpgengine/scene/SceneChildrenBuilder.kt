@@ -9,6 +9,7 @@ import io.posidon.rpgengine.tools.Filter
 import io.posidon.rpgengine.tools.Camera2D
 import io.posidon.rpgengine.window.Window
 import java.util.LinkedList
+import kotlin.math.min
 
 class SceneChildrenBuilder(
     val renderer: Renderer,
@@ -59,9 +60,9 @@ class SceneChildrenBuilder(
             nodes += this
         }
 
-        fun postprocessing(fragmentPath: String, colorBufferCount: Int, block: FilterBuilder.() -> Unit) {
+        fun postprocessing(fragmentPath: String, colorBufferCount: Int, minWidth: Int = min(window.width, window.height), block: FilterBuilder.() -> Unit) {
             val builder = FilterBuilder().apply(block)
-            nodes += Filter(renderer, window, fragmentPath, colorBufferCount, builder.uniforms, builder.nodes)
+            nodes += Filter(renderer, window, fragmentPath, colorBufferCount, minWidth, builder.uniforms, builder.nodes)
         }
     }
 }

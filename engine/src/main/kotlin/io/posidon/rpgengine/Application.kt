@@ -63,6 +63,7 @@ abstract class Application {
             while (!window.shouldClose) {
                 window.pollEvents()
                 renderer.preRender()
+                context.handleOnRenderFunctions()
                 scene.render(window)
                 renderer.postRender()
                 window.swapBuffers()

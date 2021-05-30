@@ -31,7 +31,7 @@ void main () {
     float base = base_color(uv);
     vec2 screen_size = textureSize(albedo_buffer, 0);
     float glitchiness = sin(mod(millis, 4600));
-    glitchiness *= glitchiness * (length(uv - .5) * 3.0 + 2.0);
+    glitchiness *= glitchiness * (length(uv - .5) * 4.0 + 1.0);
     glitchiness += 1.0 - 2.0 * abs(base - 0.5);
     vec2 aberration = chromatic_aberration() / screen_size * glitchiness;
     float r = base_color(uv + aberration);

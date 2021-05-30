@@ -1,5 +1,6 @@
 package io.posidon.rpgengine.gfx.platform.opengl
 
+import io.posidon.game.shared.types.Mat4f
 import io.posidon.rpgengine.debug.MainLogger
 import io.posidon.rpgengine.gfx.assets.Mesh
 import io.posidon.rpgengine.gfx.QuadShader
@@ -7,6 +8,7 @@ import io.posidon.rpgengine.gfx.renderer.Renderer
 import io.posidon.rpgengine.gfx.assets.Texture
 import io.posidon.game.shared.types.Vec2f
 import io.posidon.rpgengine.gfx.assets.Shader
+import io.posidon.rpgengine.gfx.assets.invoke
 import io.posidon.rpgengine.gfx.platform.opengl.assets.OpenGLTexture
 import io.posidon.rpgengine.gfx.renderer.FrameBuffer
 import io.posidon.rpgengine.tools.Filter
@@ -76,11 +78,12 @@ internal class OpenGLRenderer : Renderer {
         GL13.glActiveTexture(GL13.GL_TEXTURE0)
     }
 
-    override fun renderQuad(window: Window, quadShader: QuadShader, x: Float, y: Float, width: Float, height: Float) {
+    override fun renderQuad(window: Window, quadShader: QuadShader, x: Float, y: Float, z: Float, width: Float, height: Float, depth: Float, rotationX: Float, rotationY: Float, rotationZ: Float) {
         QUAD.bind()
-        quadShader.shader.bind()
-        quadShader.position(Vec2f(x / window.widthInTiles, y / window.heightInTiles))
-        quadShader.size(Vec2f(width / window.widthInTiles, height / window.heightInTiles))
+        quadShader.shader {
+            "_engine_transofm_matix" set Mat4f.transform(x, y, z, width, height, depth, rotationX, rotationY, rotationZ)
+            "_engine_screen" set Vec2f(window.widthInTiles, window.heightInTiles)
+        }
         GL11C.glDrawElements(GL11.GL_TRIANGLES, QUAD.vertexCount, GL11.GL_UNSIGNED_INT, 0)
     }
 
@@ -90,11 +93,12 @@ internal class OpenGLRenderer : Renderer {
         GL11C.glDrawElements(GL11.GL_TRIANGLES, QUAD.vertexCount, GL11.GL_UNSIGNED_INT, 0)
     }
 
-    override fun renderMesh(mesh: Mesh, window: Window, shader: QuadShader, x: Float, y: Float, scaleX: Float, scaleY: Float) {
+    override fun renderMesh(mesh: Mesh, window: Window, shader: QuadShader, x: Float, y: Float, z: Float, scaleX: Float, scaleY: Float, scaleZ: Float, rotationX: Float, rotationY: Float, rotationZ: Float) {
         mesh.bind()
-        shader.shader.bind()
-        shader.position(Vec2f(x / window.widthInTiles, y / window.heightInTiles))
-        shader.size(Vec2f(scaleX / window.widthInTiles, scaleY / window.heightInTiles))
+        shader.shader {
+            "_engine_transofm_matix" set Mat4f.transform(x, y, z, scaleX, scaleY, scaleZ, rotationX, rotationY, rotationZ)
+            "_engine_screen" set Vec2f(window.widthInTiles, window.heightInTiles)
+        }
         GL11C.glDrawElements(GL11.GL_TRIANGLES, mesh.vertexCount, GL11.GL_UNSIGNED_INT, 0)
     }
 
