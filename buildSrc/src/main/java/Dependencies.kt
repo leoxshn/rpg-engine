@@ -1,4 +1,7 @@
+import org.gradle.api.Project
 import org.gradle.internal.os.OperatingSystem
+import org.gradle.kotlin.dsl.dependencies
+import org.gradle.kotlin.dsl.project
 
 object Versions {
     val kotlinVersion = "1.5.0"

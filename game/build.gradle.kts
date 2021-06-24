@@ -10,23 +10,21 @@ version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
+    maven {
+        url = uri("https://jitpack.io")
+    }
 }
 
 dependencies {
     implementation(kotlin("stdlib"))
     implementation(project(":engine"))
-    implementation(project(":shared"))
+    implementation("io.posidon:uranium.mathlib:-SNAPSHOT")
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.0")
-
-    runtimeOnly(Dependencies.lwjglNatives())
-    runtimeOnly(Dependencies.lwjglNatives("glfw"))
-    runtimeOnly(Dependencies.lwjglNatives("opengl"))
-    runtimeOnly(Dependencies.lwjglNatives("stb"))
 }
 
 tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmTarget = "11"
 }
 
 tasks.withType<Jar> {

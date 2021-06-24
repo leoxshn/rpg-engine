@@ -1,36 +1,64 @@
 package io.posidon.rpg.client.world
 
-import io.posidon.game.shared.types.Vec2f
 import io.posidon.rpg.server.Server
-import io.posidon.rpgengine.Global
-import io.posidon.rpgengine.scene.Scene
-import io.posidon.rpgengine.scene.SceneChildrenBuilder
-import io.posidon.rpgengine.scene.node.container.ChunkMap2D
-import io.posidon.rpgengine.scene.node.util.FpsCounter
+import io.posidon.uranium.Global
+import io.posidon.uranium.scene.Scene
+import io.posidon.uranium.scene.SceneChildrenBuilder
+import io.posidon.uranium.scene.node.container.ChunkMap2D
+import io.posidon.uranium.scene.node.util.FpsCounter
+import io.posidon.uranium.mathlib.types.Vec2f
 
 class World : Scene() {
 
-    val player = Player()
-    val chunkMap = ChunkMap2D(32) {
-        val onScreen = it.toVec2f().apply {
-            selfSubtract(player.position)
-            selfDivide(2f)
-        }
-        onScreen.x > -window.widthInTiles && onScreen.y > -window.heightInTiles
-            && onScreen.x < window.widthInTiles
-            && onScreen.y < window.heightInTiles
-    }
-
     val jetBrainsMono by ttf("/fonts/JetBrains_mono.ttf")
+    val lexendDeca by ttf("/fonts/Lexend-Medium.ttf")
 
     override fun SceneChildrenBuilder.build() {
+
+        val chunkMap = ChunkMap2D(32)
+        val inspector = Inspector(
+            Vec2f(8f, 86f),
+            jetBrainsMono,
+        )
+        val player = Player(chunkMap, inspector)
+
         camera2DLayer(player.position) {
-            postprocessing("/shaders/filter.fsh", 1, minWidth = 512) {
-                shader {
-                    "millis" set Global.millis().toFloat()
+            chunkMap.setIsLoaded {
+                val onScreen = it.toVec2f().apply {
+                    selfMultiply(32f)
+                    selfSubtract(camera.xy)
                 }
-                - chunkMap
-                - player
+                onScreen.x > -window.width - 32f
+                    && onScreen.y > -window.height - 32f
+                    && onScreen.x < window.width
+                    && onScreen.y < window.height
+            }
+            - post("/shaders/postprocessing/bloom_v.fsh", 2) {
+                shader {
+                    "resolution" set window.size.toVec2f()
+                }
+                - post("/shaders/postprocessing/bloom_h.fsh", 1) {
+                    shader {
+                        "resolution" set window.size.toVec2f()
+                    }
+                    - post(
+                        "/shaders/postprocessing/entity_filter.fsh",
+                        1,
+                        minWidth = 512) {
+                        shader {
+                            "millis" set Global.millis().toFloat()
+                        }
+                        - background("/shaders/objects/background.fsh") {
+                            "millis" set Global.millis().toFloat()
+                            "position" set camera.xy
+                            "resolution" set resolution(window).toVec2f()
+                            "height_in_tiles" set 12f
+                        }
+                        - chunkMap
+                        - player
+                    }
+                    - Indicators(player)
+                }
             }
             - camera
             - Server(chunkMap, player)
@@ -38,9 +66,10 @@ class World : Scene() {
         uiLayer {
             - FpsCounter(
                 18f,
-                Vec2f(.5f, .5f),
-                jetBrainsMono
+                Vec2f(8f, 8f),
+                jetBrainsMono,
             )
+            - inspector
         }
     }
 }
