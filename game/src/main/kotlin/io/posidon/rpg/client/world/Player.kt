@@ -27,7 +27,7 @@ class Player(
         2.v(-.5f, -.5f, .5f, -.5f, 0f, .6f)
     }
 
-    val shader by quadShader("/shaders/objects/player.fsh")
+    val shader by objectShader("/shaders/objects/player.fsh")
 
     val spriteWidth = 1f
     val spriteHeight = 1.6f

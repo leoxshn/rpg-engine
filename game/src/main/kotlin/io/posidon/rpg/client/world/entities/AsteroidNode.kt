@@ -10,7 +10,6 @@ import io.posidon.uranium.scene.node.container.ChunkMap2D
 import io.posidon.uranium.scene.node.container.minusAssign
 import io.posidon.uranium.scene.node.container.plusAssign
 import io.posidon.uranium.window.Window
-import kotlin.math.sqrt
 import kotlin.random.Random
 
 class AsteroidNode(
@@ -18,7 +17,7 @@ class AsteroidNode(
     composition: Composition
 ) : EntityNode(position, composition) {
 
-    private val shader by quadShader("/shaders/objects/debris.fsh")
+    private val shader by objectShader("/shaders/objects/debris.fsh")
 
     private val noiseOffset = Random.nextFloat()
 

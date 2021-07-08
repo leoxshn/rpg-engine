@@ -25,6 +25,8 @@ import java.nio.ByteBuffer
 import java.nio.IntBuffer
 import java.util.*
 import kotlin.collections.HashMap
+import kotlin.io.path.Path
+import kotlin.io.path.div
 import kotlin.math.min
 
 
@@ -65,10 +67,22 @@ object OpenGLContext : Context {
         OpenGLTexture(id, width, height).also { log.verbose?.i("Loaded", it) }
     }
 
+    private fun preprocessGLSL(filePath: String, glsl: String): String {
+        return glsl.lines().map {
+            if (it.startsWith("#include")) {
+                val path = it.substringAfter("#include").trim()
+                    .substringAfter('"')
+                    .substringBeforeLast('"')
+                Resources.loadAsString((Path(filePath).parent / path).toString())
+            } else it
+        }.joinToString("\n")
+    }
+
     override fun loadShader(log: MainLogger, fragmentPath: String, vertexPath: String): Shader = shaderCache.getOrPut(fragmentPath to vertexPath) {
-        val libFile = Resources.loadAsString("/uraniumEngine/shaders/_include.glsl").trimEnd('\n', ' ', '\t') + '\n'
-        val vertexFile = libFile + Resources.loadAsString(vertexPath)
-        val fragmentFile = libFile + Resources.loadAsString(fragmentPath)
+        val libPath = "/uraniumEngine/shaders/_include.glsl"
+        val libFile = preprocessGLSL(libPath, Resources.loadAsString(libPath).trimEnd('\n', ' ', '\t') + '\n')
+        val vertexFile = libFile + preprocessGLSL(vertexPath, Resources.loadAsString(vertexPath))
+        val fragmentFile = libFile + preprocessGLSL(fragmentPath, Resources.loadAsString(fragmentPath))
 
         val programID = GL20C.glCreateProgram()
         val vertexID = GL20C.glCreateShader(GL20C.GL_VERTEX_SHADER)
@@ -76,14 +90,14 @@ object OpenGLContext : Context {
         GL20C.glCompileShader(vertexID)
         log.verbose?.i("Compiling shader ($vertexPath, $fragmentPath)")
         if (GL20C.glGetShaderi(vertexID, GL20C.GL_COMPILE_STATUS) == GL11.GL_FALSE) {
-            throw RuntimeException("[SHADER ERROR | $vertexPath]: " + GL20C.glGetShaderInfoLog(vertexID))
+            throw RuntimeException("[SHADER ERROR - Vertex | $vertexPath]: " + GL20C.glGetShaderInfoLog(vertexID))
         }
         log.verbose?.i("\t$vertexPath compiled successfully")
         val fragmentID = GL20C.glCreateShader(GL20C.GL_FRAGMENT_SHADER)
         GL20C.glShaderSource(fragmentID, fragmentFile)
         GL20C.glCompileShader(fragmentID)
         if (GL20C.glGetShaderi(fragmentID, GL20C.GL_COMPILE_STATUS) == GL11.GL_FALSE) {
-            throw RuntimeException("[SHADER ERROR | $fragmentPath]: " + GL20C.glGetShaderInfoLog(fragmentID))
+            throw RuntimeException("[SHADER ERROR - Fragment | $fragmentPath]: " + GL20C.glGetShaderInfoLog(fragmentID))
         }
         log.verbose?.i("\t$fragmentPath compiled successfully")
         GL20C.glAttachShader(programID, vertexID)

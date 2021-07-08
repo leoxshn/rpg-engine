@@ -2,7 +2,7 @@ package io.posidon.uranium.tools
 
 import io.posidon.uranium.mathlib.types.Vec2f
 import io.posidon.uranium.gfx.assets.Mesh
-import io.posidon.uranium.gfx.QuadShader
+import io.posidon.uranium.gfx.assets.Shader
 import io.posidon.uranium.gfx.renderer.ModifiedRenderer
 import io.posidon.uranium.gfx.renderer.Renderer
 import io.posidon.uranium.mathlib.types.Mat4f
@@ -16,12 +16,12 @@ class Camera2D(
 
     val renderer = object : ModifiedRenderer {
         override val renderer = renderer
-        override fun renderQuad(window: Window, quadShader: QuadShader, x: Float, y: Float, z: Float, width: Float, height: Float, depth: Float, rotationX: Float, rotationY: Float, rotationZ: Float) {
+        override fun renderQuad(window: Window, shader: Shader, x: Float, y: Float, z: Float, width: Float, height: Float, depth: Float, rotationX: Float, rotationY: Float, rotationZ: Float) {
             val h = 12f
             val w = h / window.height * window.width
             renderer.renderQuad(
                 window,
-                quadShader,
+                shader,
                 createTransformMatrix(
                     x - xy.x,
                     y - xy.y,
@@ -37,7 +37,7 @@ class Camera2D(
                 )
             )
         }
-        override fun renderMesh(mesh: Mesh, window: Window, shader: QuadShader, x: Float, y: Float, z: Float, scaleX: Float, scaleY: Float, scaleZ: Float, rotationX: Float, rotationY: Float, rotationZ: Float) {
+        override fun renderMesh(mesh: Mesh, window: Window, shader: Shader, x: Float, y: Float, z: Float, scaleX: Float, scaleY: Float, scaleZ: Float, rotationX: Float, rotationY: Float, rotationZ: Float) {
             val h = 12f
             val w = h / window.height * window.width
             renderer.renderMesh(

@@ -6,9 +6,7 @@ import io.posidon.uranium.Global
 import io.posidon.uranium.gfx.assets.invoke
 import io.posidon.uranium.gfx.renderer.Renderer
 import io.posidon.uranium.gfx.renderer.renderQuad2D
-import io.posidon.uranium.mathlib.clamp
 import io.posidon.uranium.scene.node.container.ChunkMap2D
-import io.posidon.uranium.scene.node.container.minusAssign
 import io.posidon.uranium.window.Window
 import kotlin.math.max
 import kotlin.random.Random
@@ -20,7 +18,7 @@ class ItemNode(
 
     val velocity = Vec2f.zero()
 
-    private val shader by quadShader("/shaders/objects/debris.fsh")
+    private val shader by objectShader("/shaders/objects/debris.fsh")
 
     private val noiseOffset = Random.nextFloat()
 

@@ -9,7 +9,7 @@ import kotlin.math.PI
 
 class Indicators(val player: Player) : Node() {
 
-    val entityQuad by quadShader("/shaders/entity_quad.fsh")
+    val entityQuad by objectShader("/shaders/entity_quad.fsh")
 
     override fun render(renderer: Renderer, window: Window) {
         player.closestEntities.forEachIndexed { i, entity ->

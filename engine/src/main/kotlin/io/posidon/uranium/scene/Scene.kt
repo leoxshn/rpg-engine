@@ -21,14 +21,21 @@ abstract class Scene : ContextInitialized<Scene>() {
 
     class Layer(
         val renderer: Renderer,
-        val children: Array<Node>
+        val children: Array<Node>,
+        val onInit: Layer.() -> Unit,
+        val onDestroy: Layer.() -> Unit
     ) {
+        var enabled = true
+
         fun init() {
             children.forEach(Node::init)
+            onInit()
         }
 
         fun render(window: Window) {
+            renderer.preRender()
             children.forEach { it.render(renderer, window) }
+            renderer.postRender()
         }
 
         fun update(delta: Float) {
@@ -37,6 +44,7 @@ abstract class Scene : ContextInitialized<Scene>() {
 
         fun destroy() {
             children.forEach(Node::destroy)
+            onDestroy()
         }
     }
 
@@ -53,29 +61,20 @@ abstract class Scene : ContextInitialized<Scene>() {
 
         val b = SceneChildrenBuilder(renderer, window).apply { build() }
         layers = Array(b.layers.size) {
-            val l = b.layers[it]
-            val c = l.nodes
-            Layer(
-                renderer = l.renderer,
-                children = Array(c.size) {
-                    c[it].apply {
-                        this.internalInit(log, context, input)
-                    }
-                }
-            )
+            b.layers[it].build(this)
         }
         layers.forEach(Layer::init)
     }
 
-    fun render(window: Window) {
-        layers.forEach { it.render(window) }
+    internal fun render(window: Window) {
+        layers.forEach { if (it.enabled) it.render(window) }
     }
 
-    fun update(delta: Float) {
-        layers.forEach { it.update(delta) }
+    internal fun update(delta: Float) {
+        layers.forEach {if (it.enabled)  it.update(delta) }
     }
 
-    fun destroy() {
+    internal fun internalDestroy() {
         layers.forEach(Layer::destroy)
     }
 }

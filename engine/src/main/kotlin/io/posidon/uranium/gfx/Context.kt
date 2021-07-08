@@ -1,6 +1,5 @@
 package io.posidon.uranium.gfx
 
-import io.posidon.uranium.mathlib.types.*
 import io.posidon.uranium.debug.MainLogger
 import io.posidon.uranium.gfx.platform.opengl.OpenGLContext
 import io.posidon.uranium.gfx.assets.Font
@@ -22,22 +21,5 @@ interface Context {
 
 internal fun getContext() = OpenGLContext
 
-@JvmInline
-value class QuadShader(val shader: Shader): Shader {
-    inline fun position(position: Vec2f) { shader["_engine_quad_position"] = position }
-    inline fun size(size: Vec2f) { shader["_engine_quad_size"] = size }
-    override fun set(name: String, value: Float) = shader.set(name, value)
-    override fun set(name: String, value: Int) = shader.set(name, value)
-    override fun set(name: String, value: Boolean) = shader.set(name, value)
-    override fun set(name: String, value: Vec2f) = shader.set(name, value)
-    override fun set(name: String, value: Vec2i) = shader.set(name, value)
-    override fun set(name: String, value: Vec3f) = shader.set(name, value)
-    override fun set(name: String, value: Vec3i) = shader.set(name, value)
-    override fun set(name: String, value: Vec4f) = shader.set(name, value)
-    override fun set(name: String, value: Mat4f) = shader.set(name, value)
-    override fun bind() = shader.bind()
-    override fun destroy() = shader.destroy()
-}
-
-inline fun Context.loadQuadShader(log: MainLogger, fragmentPath: String): QuadShader = QuadShader(loadShader(log, fragmentPath, "/uraniumEngine/shaders/quad.vsh"))
+inline fun Context.loadObjectShader(log: MainLogger, fragmentPath: String): Shader = loadShader(log, fragmentPath, "/uraniumEngine/shaders/quad.vsh")
 inline fun Context.loadScreenShader(log: MainLogger, fragmentPath: String): Shader = loadShader(log, fragmentPath, "/uraniumEngine/shaders/fullscreen.vsh")

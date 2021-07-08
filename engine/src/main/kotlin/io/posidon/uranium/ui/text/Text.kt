@@ -12,6 +12,7 @@ import io.posidon.uranium.gfx.renderer.Renderer
 import io.posidon.uranium.gfx.renderer.renderQuad2D
 import io.posidon.uranium.scene.Positional
 import io.posidon.uranium.scene.node.Node
+import io.posidon.uranium.ui.UIComponent
 import io.posidon.uranium.util.Stack
 import io.posidon.uranium.util.fromColorInt
 import io.posidon.uranium.util.set
@@ -25,12 +26,12 @@ import kotlin.random.Random
 class Text(
     val fontHeight: Float,
     var text: String,
-    override var position: Vec2f,
+    override val position: Vec2f,
     val font: Font
-) : Node(), Positional<Vec2f> {
+) : Node(), UIComponent {
 
-    private val shader by quadShader("/uraniumEngine/shaders/text.fsh")
-    private val symbolShader by quadShader("/uraniumEngine/shaders/text_symbol.fsh")
+    private val shader by objectShader("/uraniumEngine/shaders/text.fsh")
+    private val symbolShader by objectShader("/uraniumEngine/shaders/text_symbol.fsh")
 
     fun isKerningEnabled() = true
 
@@ -54,6 +55,13 @@ class Text(
         override fun toString() = "$ESCAPE$CUSTOM_SYMBOL_ESCAPE${id.toString(16).padStart(4, '0')}"
     }
 
+
+    private var sp: Float = 0f
+
+    override fun init() {
+        sp = STBTruetype.stbtt_ScaleForPixelHeight(font.info, fontHeight)
+    }
+
     override fun render(renderer: Renderer, window: Window) {
         val text = text
         var textColor = textColor
@@ -70,7 +78,6 @@ class Text(
             val x = stack.float(0f)
             val y = stack.float(0f)
 
-            val sp = STBTruetype.stbtt_ScaleForPixelHeight(font.info, fontHeight)
             val q = STBTTAlignedQuad.mallocStack(stack.stack)
 
             var i = 0
@@ -154,7 +161,7 @@ class Text(
 
                 val yy = lineI * ((font.ascent - font.descent + font.lineGap) * sp + fontHeight * lineSpacingMultiplier)
 
-                renderer.renderQuad2D(window, shader, position.x + x0 * 2, -(position.y + yy + y0 + fontHeight), x1 - x0, y1 - y0)
+                renderer.renderQuad2D(window, shader, position.x + x1 * 2, -(position.y + yy + y0 + fontHeight), x1 - x0, y1 - y0)
             }
         }
     }
@@ -191,6 +198,14 @@ class Text(
         }
         cpOut.put(0, c1.code)
         return 1
+    }
+
+    override fun getWidth(): Float {
+        return text.lines().maxOf { getStringWidth(font.info, it, 0, it.length) }
+    }
+
+    override fun getHeight(): Float {
+        return text.lines().size * ((font.ascent - font.descent + font.lineGap) * sp + fontHeight * lineSpacingMultiplier)
     }
 
     companion object {

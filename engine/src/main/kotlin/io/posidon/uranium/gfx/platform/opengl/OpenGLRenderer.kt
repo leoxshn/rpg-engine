@@ -3,7 +3,6 @@ package io.posidon.uranium.gfx.platform.opengl
 import io.posidon.uranium.mathlib.types.Mat4f
 import io.posidon.uranium.debug.MainLogger
 import io.posidon.uranium.gfx.assets.Mesh
-import io.posidon.uranium.gfx.QuadShader
 import io.posidon.uranium.gfx.renderer.Renderer
 import io.posidon.uranium.gfx.assets.Texture
 import io.posidon.uranium.gfx.assets.Shader
@@ -77,25 +76,25 @@ internal class OpenGLRenderer : Renderer {
         GL13.glActiveTexture(GL13.GL_TEXTURE0)
     }
 
-    override fun renderQuad(window: Window, quadShader: QuadShader, x: Float, y: Float, z: Float, width: Float, height: Float, depth: Float, rotationX: Float, rotationY: Float, rotationZ: Float) {
-        renderQuad(window, quadShader, Mat4f.identity())
+    override fun renderQuad(window: Window, shader: Shader, x: Float, y: Float, z: Float, width: Float, height: Float, depth: Float, rotationX: Float, rotationY: Float, rotationZ: Float) {
+        renderQuad(window, shader, Mat4f.identity())
     }
 
-    override fun renderMesh(mesh: Mesh, window: Window, shader: QuadShader, x: Float, y: Float, z: Float, scaleX: Float, scaleY: Float, scaleZ: Float, rotationX: Float, rotationY: Float, rotationZ: Float) {
+    override fun renderMesh(mesh: Mesh, window: Window, shader: Shader, x: Float, y: Float, z: Float, scaleX: Float, scaleY: Float, scaleZ: Float, rotationX: Float, rotationY: Float, rotationZ: Float) {
         renderMesh(mesh, window, shader, Mat4f.identity())
     }
 
-    override fun renderQuad(window: Window, quadShader: QuadShader, transform: Mat4f) {
+    override fun renderQuad(window: Window, shader: Shader, transform: Mat4f) {
         QUAD.bind()
-        quadShader.shader {
+        shader {
             "_engine_transofm_matix" set transform
         }
         GL11C.glDrawElements(GL11.GL_TRIANGLES, QUAD.vertexCount, GL11.GL_UNSIGNED_INT, 0)
     }
 
-    override fun renderMesh(mesh: Mesh, window: Window, shader: QuadShader, transform: Mat4f) {
+    override fun renderMesh(mesh: Mesh, window: Window, shader: Shader, transform: Mat4f) {
         mesh.bind()
-        shader.shader {
+        shader {
             "_engine_transofm_matix" set transform
         }
         GL11C.glDrawElements(GL11.GL_TRIANGLES, mesh.vertexCount, GL11.GL_UNSIGNED_INT, 0)
@@ -109,6 +108,10 @@ internal class OpenGLRenderer : Renderer {
 
     override fun clear() {
         GL11C.glClear(GL11.GL_COLOR_BUFFER_BIT or GL11.GL_DEPTH_BUFFER_BIT)
+    }
+
+    override fun preRender() {
+
     }
 
     override fun postRender() {
@@ -127,9 +130,20 @@ internal class OpenGLRenderer : Renderer {
         buffer.bind()
         clear()
         block()
-        postRender()
         currentFrameBuffer = last
         last.bind()
+    }
+
+    override fun enable(feature: Renderer.Feature) {
+        GL11.glEnable(native(feature))
+    }
+
+    override fun disable(feature: Renderer.Feature) {
+        GL11.glDisable(native(feature))
+    }
+
+    fun native(feature: Renderer.Feature): Int = when (feature) {
+        Renderer.Feature.DEPTH_TEST -> GL11.GL_DEPTH_TEST
     }
 
     override fun createColorBuffer(attachment: Int, width: Int, height: Int): Renderer.Buffer =

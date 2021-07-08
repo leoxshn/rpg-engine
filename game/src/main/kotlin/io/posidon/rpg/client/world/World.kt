@@ -5,7 +5,7 @@ import io.posidon.uranium.Global
 import io.posidon.uranium.scene.Scene
 import io.posidon.uranium.scene.SceneChildrenBuilder
 import io.posidon.uranium.scene.node.container.ChunkMap2D
-import io.posidon.uranium.scene.node.util.FpsCounter
+import io.posidon.uranium.ui.FpsCounter
 import io.posidon.uranium.mathlib.types.Vec2f
 
 class World : Scene() {
@@ -60,7 +60,6 @@ class World : Scene() {
                     - Indicators(player)
                 }
             }
-            - camera
             - Server(chunkMap, player)
         }
         uiLayer {

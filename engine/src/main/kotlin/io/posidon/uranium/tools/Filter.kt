@@ -21,7 +21,7 @@ class Filter internal constructor(
     val minWidth: Int,
     val uniforms: Uniforms.() -> Unit,
     nodes: LinkedList<Node>
-) : NodeGroup(nodes), FrameBuffer {
+) : NodeGroup<Node>(nodes), FrameBuffer {
 
     private val shader by screenShader(fragmentPath)
 

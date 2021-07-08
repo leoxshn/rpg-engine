@@ -65,13 +65,12 @@ abstract class Application {
                 renderer.clear()
                 context.handleOnRenderFunctions()
                 scene.render(window)
-                renderer.postRender()
                 window.swapBuffers()
                 frameSynchronizer.sync(targetFPS)
             }
         }
         running = false
-        scene.destroy()
+        scene.internalDestroy()
         internalDestroy()
     }
 

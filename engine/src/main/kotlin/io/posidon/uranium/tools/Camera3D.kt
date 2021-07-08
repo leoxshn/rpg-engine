@@ -1,7 +1,8 @@
 package io.posidon.uranium.tools
 
 import io.posidon.uranium.gfx.assets.Mesh
-import io.posidon.uranium.gfx.QuadShader
+import io.posidon.uranium.gfx.assets.Shader
+import io.posidon.uranium.gfx.assets.invoke
 import io.posidon.uranium.gfx.renderer.ModifiedRenderer
 import io.posidon.uranium.gfx.renderer.Renderer
 import io.posidon.uranium.mathlib.types.Mat4f
@@ -12,28 +13,35 @@ import io.posidon.uranium.window.Window
 
 class Camera3D(
     renderer: Renderer,
+    window: Window,
     val position: Vec3f,
     val rotation: Vec3f,
     var fov: Float
 ) : Node() {
 
     val near = 0.002f
-    val far = 100f
+    val far = 1000f
 
-    private val _projectionMatrix = ProjectionMatrix(fov, 1f, near, far)
+    private val _projectionMatrix = ProjectionMatrix(fov, window.aspectRatio, near, far)
     val projectionMatrix: Mat4f get() = _projectionMatrix
+    val rotationMatrix: Mat4f = createRotation()
+
     val viewMatrix: Mat4f = createView()
 
-    fun createView(): Mat4f {
-        val translation = Mat4f.identity().apply {
-            this[3, 0] = -position.x
-            this[3, 1] = -position.y
-            this[3, 2] = -position.z
-        }
+    private fun createRotation(): Mat4f {
         val rotX = Mat4f.rotateX(rotation.x.toDouble())
         val rotY = Mat4f.rotateY(rotation.y.toDouble())
         val rotZ = Mat4f.rotateY(rotation.z.toDouble())
-        return translation * (rotZ * rotY * rotX)
+        return rotZ * rotY * rotX
+    }
+
+    private fun createView(): Mat4f {
+        val translation = Mat4f.translate(
+            -position.x,
+            -position.y,
+            -position.z
+        )
+        return translation * rotationMatrix
     }
 
     override fun render(renderer: Renderer, window: Window) {
@@ -41,6 +49,7 @@ class Camera3D(
     }
 
     override fun update(delta: Float) {
+        rotationMatrix.set(createRotation())
         viewMatrix.set(createView())
     }
 
@@ -64,10 +73,19 @@ class Camera3D(
 
     val renderer = object : ModifiedRenderer {
         override val renderer = renderer
-        override fun renderQuad(window: Window, quadShader: QuadShader, x: Float, y: Float, z: Float, width: Float, height: Float, depth: Float, rotationX: Float, rotationY: Float, rotationZ: Float) {
+
+        override fun preRender() {
+            enable(Renderer.Feature.DEPTH_TEST)
+        }
+
+        override fun postRender() {
+            disable(Renderer.Feature.DEPTH_TEST)
+        }
+
+        override fun renderQuad(window: Window, shader: Shader, x: Float, y: Float, z: Float, width: Float, height: Float, depth: Float, rotationX: Float, rotationY: Float, rotationZ: Float) {
             renderer.renderQuad(
                 window,
-                quadShader,
+                shader,
                 createMatrix(
                     x,
                     y,
@@ -81,20 +99,22 @@ class Camera3D(
                 )
             )
         }
-        override fun renderMesh(mesh: Mesh, window: Window, shader: QuadShader, x: Float, y: Float, z: Float, scaleX: Float, scaleY: Float, scaleZ: Float, rotationX: Float, rotationY: Float, rotationZ: Float) {
+        override fun renderMesh(mesh: Mesh, window: Window, shader: Shader, x: Float, y: Float, z: Float, scaleX: Float, scaleY: Float, scaleZ: Float, rotationX: Float, rotationY: Float, rotationZ: Float) {
             renderer.renderMesh(
                 mesh,
                 window,
                 shader,
-                x,
-                y,
-                z,
-                scaleX,
-                scaleY,
-                scaleZ,
-                rotationX,
-                rotationY,
-                rotationZ
+                createMatrix(
+                    x,
+                    y,
+                    z,
+                    scaleX,
+                    scaleY,
+                    scaleZ,
+                    rotationX,
+                    rotationY,
+                    rotationZ
+                )
             )
         }
     }

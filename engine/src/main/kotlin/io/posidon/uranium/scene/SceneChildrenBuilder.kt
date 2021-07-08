@@ -6,12 +6,16 @@ import io.posidon.uranium.gfx.assets.Texture
 import io.posidon.uranium.gfx.assets.Uniforms
 import io.posidon.uranium.gfx.assets.invoke
 import io.posidon.uranium.gfx.renderer.Renderer
-import io.posidon.uranium.gfx.renderer.UIRenderer
+import io.posidon.uranium.ui.UIRenderer
 import io.posidon.uranium.mathlib.types.Vec3f
 import io.posidon.uranium.scene.node.Node
 import io.posidon.uranium.tools.Filter
 import io.posidon.uranium.tools.Camera2D
 import io.posidon.uranium.tools.Camera3D
+import io.posidon.uranium.ui.box.Box
+import io.posidon.uranium.ui.box.UILayout
+import io.posidon.uranium.ui.box.Vertical
+//import io.posidon.uranium.ui.box.Box
 import io.posidon.uranium.window.Window
 import java.util.LinkedList
 import kotlin.math.min
@@ -32,20 +36,52 @@ class SceneChildrenBuilder(
     }
 
     fun camera3DLayer(init: LayerBuilderWithCamera3D.() -> Unit) {
-        layers += LayerBuilderWithCamera3D(Camera3D(renderer, Vec3f.zero(), Vec3f.zero(), 70f), window).apply(init)
+        layers += LayerBuilderWithCamera3D(Camera3D(renderer, window, Vec3f.zero(), Vec3f.zero(), 70f), window).apply(init)
     }
 
-    fun uiLayer(init: LayerBuilder.() -> Unit) = customLayer(UIRenderer(renderer), init)
+    fun uiLayer(init: UILayerBuilder.() -> Unit) {
+        layers += UILayerBuilder(UIRenderer(renderer), window).apply(init)
+    }
+
+    class UILayerBuilder internal constructor(
+        renderer: UIRenderer,
+        window: Window
+    ) : LayerBuilder(renderer, window) {
+
+        fun box(layoutType: UILayout, position: Vec2f = Vec2f.zero(), block: BoxBuilder.() -> Unit): Box {
+            val builder = BoxBuilder().apply(block)
+            return Box(position, layoutType, builder.nodes)
+        }
+
+        inline fun vbox(position: Vec2f = Vec2f.zero(), noinline block: BoxBuilder.() -> Unit) = box(Vertical(), position, block)
+    }
+
+    class BoxBuilder internal constructor(
+    ) {
+        internal val nodes = LinkedList<Node>()
+
+        operator fun Node.unaryMinus() {
+            nodes += this
+        }
+    }
 
     class LayerBuilderWithCamera2D internal constructor(
         val camera: Camera2D,
         window: Window
-    ) : LayerBuilder(camera.renderer, window)
+    ) : LayerBuilder(camera.renderer, window) {
+        init {
+            - camera
+        }
+    }
 
     class LayerBuilderWithCamera3D internal constructor(
         val camera: Camera3D,
         window: Window
-    ) : LayerBuilder(camera.renderer, window)
+    ) : LayerBuilder(camera.renderer, window) {
+        init {
+            - camera
+        }
+    }
 
     class FilterBuilder internal constructor(
         val minWidth: Int
@@ -91,6 +127,29 @@ class SceneChildrenBuilder(
                     renderer.renderScreen(window, shader)
                 }
             }
+        }
+
+        private var onInit: Scene.Layer.() -> Unit = {}
+        fun onInit(block: Scene.Layer.() -> Unit) {
+            this.onInit = block
+        }
+
+        private var onDestroy: Scene.Layer.() -> Unit = {}
+        fun onDestroy(block: Scene.Layer.() -> Unit) {
+            this.onDestroy = block
+        }
+
+        fun build(scene: Scene): Scene.Layer {
+            return Scene.Layer(
+                renderer = renderer,
+                children = Array(nodes.size) { i ->
+                    nodes[i].also {
+                        it.internalInit(scene.log, scene.context, scene.input)
+                    }
+                },
+                onInit = onInit,
+                onDestroy = onDestroy
+            )
         }
     }
 }

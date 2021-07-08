@@ -11,6 +11,7 @@ import java.util.*
 typealias OnKeyPressedListener = (window: Window, key: Int, scanCode: Int, action: Int, mods: Int) -> Unit
 typealias OnScrollListener = (window: Window, x: Double, y: Double) -> Unit
 typealias OnClickListener = (window: Window, button: Int, action: Int, mods: Int, cursorX: Double, cursorY: Double) -> Unit
+typealias OnCursorMoveListener = (window: Window, x: Double, y: Double, distanceX: Double, distanceY: Double) -> Unit
 
 class InputManager {
 
@@ -35,6 +36,9 @@ class InputManager {
 
     fun addOnClickListener(listener: OnClickListener) { onClickListeners += listener }
     fun removeOnClickListener(listener: OnClickListener) { onClickListeners -= listener }
+
+    fun addOnCursorMoveListener(listener: OnCursorMoveListener) { onCursorMoveListeners += listener }
+    fun removeOnCursorMoveListener(listener: OnCursorMoveListener) { onCursorMoveListeners -= listener }
 
     var goUp = false
         private set
@@ -87,16 +91,17 @@ class InputManager {
     private var oldCurX = 0.0
     private var oldCurY = 0.0
     internal fun onMouseMove(window: Window, x: Double, y: Double) {
-        if (mouseLocked) {
-            curX = x
-            curY = y
+        curX = x
+        curY = y
 
-            val dx = (curX - oldCurX).toFloat()
-            val dy = (curY - oldCurY).toFloat()
-
-            oldCurX = curX
-            oldCurY = curY
+        val dx = curX - oldCurX
+        val dy = curY - oldCurY
+        onCursorMoveListeners.forEach {
+            it(window, x, y, dx, dy)
         }
+
+        oldCurX = curX
+        oldCurY = curY
     }
 
     internal fun init(window: Window) {
@@ -117,4 +122,5 @@ class InputManager {
     private val onKeyPressedListeners = LinkedList<OnKeyPressedListener>()
     private val onScrollListeners = LinkedList<OnScrollListener>()
     private val onClickListeners = LinkedList<OnClickListener>()
+    private val onCursorMoveListeners = LinkedList<OnCursorMoveListener>()
 }

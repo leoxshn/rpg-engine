@@ -1,4 +1,4 @@
-package io.posidon.uranium.scene.node.util
+package io.posidon.uranium.ui
 
 import io.posidon.uranium.mathlib.types.Vec2f
 import io.posidon.uranium.gfx.assets.Font
@@ -12,11 +12,11 @@ class FpsCounter(
     fontHeight: Float,
     position: Vec2f,
     font: Font
-) : NodeWrapper<Text>(Text(fontHeight, "fps: __", position, font)) {
+) : NodeWrapper<Text>(Text(fontHeight, "fps: __", position, font)), UIComponent {
 
-    inline val font get() = node?.font
-    inline val fontHeight get() = node?.fontHeight
-    inline val position get() = node?.position
+    inline val font get() = node.font
+    inline val fontHeight get() = node.fontHeight
+    override val position get() = node.position
 
     private var ups = 0
     private var lastUpdateTime by onInitMutable { System.nanoTime() }
@@ -38,6 +38,9 @@ class FpsCounter(
         val s = (now - lastRenderTime) / 1000_000_000.0
         fps = (1 / s).roundToInt()
         lastRenderTime = now
-        node?.text = "fps: $fps\nups: $ups"
+        node.text = "fps: $fps\nups: $ups"
     }
+
+    override fun getWidth() = node.getWidth()
+    override fun getHeight() = node.getHeight()
 }

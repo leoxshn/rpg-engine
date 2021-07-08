@@ -8,22 +8,20 @@ import io.posidon.uranium.scene.node.Node
 import io.posidon.uranium.window.Window
 import java.util.*
 
-open class NodeGroup : Node {
+open class NodeGroup <NODE : Node> (
+    private val nodes: MutableList<NODE> = LinkedList()
+) : Node() {
 
-    constructor() : this(LinkedList())
-    constructor(nodes: MutableList<Node>) : super() {
-        this.nodes = nodes
-    }
-
-    private val nodes: MutableList<Node>
-
-    fun add(node: Node) {
+    fun add(node: NODE) {
         nodes += node
         if (initialized) {
             node.internalInit(log, context, input)
             node.init()
         }
+        onAdd(node)
     }
+
+    open fun onAdd(node: NODE) {}
 
     private var initialized = false
 
@@ -60,4 +58,4 @@ open class NodeGroup : Node {
     }
 }
 
-inline operator fun NodeGroup.plusAssign(node: Node) = add(node)
+inline operator fun <NODE : Node> NodeGroup<NODE>.plusAssign(node: NODE) = add(node)

@@ -7,9 +7,9 @@ import io.posidon.uranium.gfx.renderer.Renderer
 import io.posidon.uranium.scene.node.Node
 import io.posidon.uranium.window.Window
 
-open class NodeWrapper<T : Node> (node: T? = null) : Node() {
+open class NodeWrapper<T : Node?> (node: T) : Node() {
 
-    var node: T? = node
+    var node: T = node
         set(value) {
             field = value
             if (value != null && initialized) {
