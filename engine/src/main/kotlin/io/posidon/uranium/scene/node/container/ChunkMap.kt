@@ -1,11 +1,12 @@
 package io.posidon.uranium.scene.node.container
 
 import io.posidon.uranium.mathlib.types.Vec2f
-import io.posidon.uranium.mathlib.types.Vec2i
+import io.posidon.uranium.mathlib.types.functions.*
 import io.posidon.uranium.debug.MainLogger
 import io.posidon.uranium.input.InputManager
 import io.posidon.uranium.gfx.Context
 import io.posidon.uranium.gfx.renderer.Renderer
+import io.posidon.uranium.mathlib.types.Vec2i
 import io.posidon.uranium.scene.Positional
 import io.posidon.uranium.scene.node.Node
 import io.posidon.uranium.window.Window

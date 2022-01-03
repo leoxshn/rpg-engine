@@ -10,7 +10,8 @@ import io.posidon.uranium.gfx.assets.Texture
 import io.posidon.uranium.gfx.assets.invoke
 import io.posidon.uranium.gfx.renderer.Renderer
 import io.posidon.uranium.gfx.renderer.renderQuad2D
-import io.posidon.uranium.scene.Positional
+import io.posidon.uranium.mathlib.types.functions.*
+import io.posidon.uranium.mathlib.types.v2
 import io.posidon.uranium.scene.node.Node
 import io.posidon.uranium.ui.UIComponent
 import io.posidon.uranium.util.Stack
@@ -70,7 +71,6 @@ class Text(
 
         val scale = fontHeight / Font.BITMAP_PX_HEIGHT
         val factor = Vec2f(1f, 1f).apply { selfDivide(window.contentScale) }
-        val m = factor * scale
         var lineI = 0
 
         Stack.push { stack ->
@@ -78,7 +78,7 @@ class Text(
             val x = stack.float(0f)
             val y = stack.float(0f)
 
-            val q = STBTTAlignedQuad.mallocStack(stack.stack)
+            val q = STBTTAlignedQuad.malloc(stack.stack)
 
             var i = 0
             val to = text.length
@@ -108,15 +108,15 @@ class Text(
                                 "text_color" set textColor
                             }
 
-                            val yy = lineI * ((font.ascent - font.descent + font.lineGap) * sp + fontHeight * lineSpacingMultiplier)
+                            val yy = lineI * fontHeight * (lineSpacingMultiplier + 1)
 
-                            val width = font.ascent * symbol.width / symbol.height * factor.x * sp
-                            val height = font.ascent * factor.y * sp
-                            val px = position.x + x[0] * 2 * m.x
-                            val py = -(position.y + yy + y[0] * m.y + fontHeight * factor.y) + height / 2f
-                            renderer.renderQuad2D(window, symbolShader, px, py, width, height)
+                            val height = font.ascent * sp
+                            val width = height * symbol.width / symbol.height
+                            val px = position.x + x[0] * 2 * scale
+                            val py = -(position.y + yy + y[0] * scale + fontHeight) + height / 2f
+                            renderer.renderQuad2D(window, symbolShader, px * factor.x, py * factor.y, width * factor.x, height * factor.y)
 
-                            x[0] += width / m.y / 2f
+                            x[0] += width / scale / 2f
 
                             font.texture.bind(0)
                             continue@loop
@@ -132,6 +132,9 @@ class Text(
                 } else if (cp < 32) {
                     continue
                 }
+
+                val yy = lineI * fontHeight * (lineSpacingMultiplier + 1)
+
                 STBTruetype.stbtt_GetBakedQuad(
                     font.charData,
                     font.texture.width,
@@ -148,25 +151,23 @@ class Text(
                     x[0] += STBTruetype.stbtt_GetCodepointKernAdvance(font.info, cp, pCodePoint[0]).toFloat()
                 }
 
-                val x0: Float = q.x0() * m.x
-                val x1: Float = q.x1() * m.x
-                val y0: Float = q.y0() * m.y
-                val y1: Float = q.y1() * m.y
+                val x0: Float = q.x0() * scale
+                val x1: Float = q.x1() * scale
+                val y0: Float = q.y0() * scale
+                val y1: Float = q.y1() * scale
 
                 shader {
-                    "char_uv_start" set Vec2f(q.s0(), q.t0())
-                    "char_uv_end" set Vec2f(q.s1(), q.t1())
+                    "char_uv_start" set v2(q.s0(), q.t0())
+                    "char_uv_end" set v2(q.s1(), q.t1())
                     "text_color" set textColor
                 }
 
-                val yy = lineI * ((font.ascent - font.descent + font.lineGap) * sp + fontHeight * lineSpacingMultiplier)
-
-                renderer.renderQuad2D(window, shader, position.x + x1 * 2, -(position.y + yy + y0 + fontHeight), x1 - x0, y1 - y0)
+                renderer.renderQuad2D(window, shader, (position.x + x0 * 2) * factor.x, -(position.y + yy + y0 + fontHeight) * factor.y, (x1 - x0) * factor.x, (y1 - y0) * factor.y)
             }
         }
     }
 
-    private fun getStringWidth(info: STBTTFontinfo, text: String, from: Int, to: Int): Float {
+    private fun getStringWidth(info: STBTTFontinfo, text: String, from: Int, to: Int): Int {
         var width = 0
         Stack.push { stack ->
             val pCodePoint = stack.mallocInt(1)
@@ -184,7 +185,7 @@ class Text(
                 }
             }
         }
-        return width * STBTruetype.stbtt_ScaleForPixelHeight(info, fontHeight)
+        return width
     }
 
     private fun getCP(text: String, to: Int, i: Int, cpOut: IntBuffer): Int {
@@ -201,7 +202,7 @@ class Text(
     }
 
     override fun getWidth(): Float {
-        return text.lines().maxOf { getStringWidth(font.info, it, 0, it.length) }
+        return text.lines().maxOf { getStringWidth(font.info, it, 0, it.length) * sp }
     }
 
     override fun getHeight(): Float {

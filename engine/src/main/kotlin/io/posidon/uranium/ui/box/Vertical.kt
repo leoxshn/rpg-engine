@@ -1,5 +1,6 @@
 package io.posidon.uranium.ui.box
 
+import io.posidon.uranium.ui.Gravity
 import io.posidon.uranium.ui.UIComponent
 
 class Vertical : UILayout {

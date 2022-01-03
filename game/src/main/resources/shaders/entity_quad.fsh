@@ -2,9 +2,9 @@ in vec2 uv;
 
 uniform bool is_chosen = false;
 
-const float border_width = .03f;
-const float border_width_selected = .08f;
-const float aspect = 1f;
+const float border_width = .03;
+const float border_width_selected = .08;
+const float aspect = 1.0;
 
 out vec4 out_Color;
 

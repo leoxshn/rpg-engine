@@ -87,6 +87,8 @@ class Window internal constructor(
 
     companion object {
         fun init() {
+            //if (GLFW.glfwPlatformSupported(GLFW.GLFW_PLATFORM_WAYLAND))
+            //    GLFW.glfwInitHint(GLFW.GLFW_PLATFORM, GLFW.GLFW_PLATFORM_WAYLAND)
             check(GLFW.glfwInit()) {
                 "[GLFW ERROR]: GLFW wasn't inititalized"
             }

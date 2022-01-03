@@ -34,7 +34,7 @@ class Filter internal constructor(
                 renderer.createColorBuffer(it, w, h)
             } else renderer.createDepthBuffer(w, h)
         }.apply {
-            forEach(Renderer.Buffer::init)
+            forEach(Renderer.FrameBuffer::init)
             GL20.glDrawBuffers(IntArray(colorBufferCount) {
                 GL30.GL_COLOR_ATTACHMENT0 + it
             })
@@ -82,6 +82,9 @@ class Filter internal constructor(
 
     companion object {
         fun calculateBufferSize(windowWidth: Int, windowHeight: Int, minWidth: Int): Vec2i {
+            if (minWidth == -1) {
+                return Vec2i(windowWidth, windowHeight)
+            }
             val w: Int
             val h: Int
             if (windowWidth > windowHeight) {

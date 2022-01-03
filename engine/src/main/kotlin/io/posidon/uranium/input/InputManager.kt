@@ -1,6 +1,7 @@
 package io.posidon.uranium.input
 
 import io.posidon.uranium.mathlib.types.Vec2f
+import io.posidon.uranium.mathlib.types.functions.*
 import io.posidon.uranium.util.Heap
 import io.posidon.uranium.util.set
 import io.posidon.uranium.window.Window

@@ -4,17 +4,16 @@ import io.posidon.uranium.debug.MainLogger
 import io.posidon.uranium.debug.i
 import io.posidon.uranium.util.Resources
 import io.posidon.uranium.gfx.*
-import io.posidon.uranium.gfx.assets.Font
-import io.posidon.uranium.gfx.assets.Mesh
-import io.posidon.uranium.gfx.assets.Shader
-import io.posidon.uranium.gfx.assets.Texture
+import io.posidon.uranium.gfx.assets.*
 import io.posidon.uranium.gfx.platform.opengl.assets.OpenGLMesh
 import io.posidon.uranium.gfx.platform.opengl.assets.OpenGLShader
 import io.posidon.uranium.gfx.platform.opengl.assets.OpenGLTexture
+import io.posidon.uranium.gfx.platform.opengl.assets.OpenGLTilesetTexture
 import io.posidon.uranium.gfx.renderer.Renderer
 import io.posidon.uranium.util.Heap
 import io.posidon.uranium.util.Stack
 import io.posidon.uranium.util.set
+import org.lwjgl.BufferUtils
 import org.lwjgl.opengl.*
 import org.lwjgl.stb.STBImage
 import org.lwjgl.stb.STBTTBakedChar
@@ -28,7 +27,6 @@ import kotlin.collections.HashMap
 import kotlin.io.path.Path
 import kotlin.io.path.div
 import kotlin.math.min
-
 
 object OpenGLContext : Context {
     override fun getRenderer(): Renderer = OpenGLRenderer()
@@ -50,7 +48,17 @@ object OpenGLContext : Context {
         val id = GL11.glGenTextures()
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, id)
         GL11.glPixelStorei(GL11.GL_UNPACK_ALIGNMENT, 1)
-        GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, width, height, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buf)
+        GL11.glTexImage2D(
+            GL11.GL_TEXTURE_2D,
+            0,
+            GL11.GL_RGBA,
+            width,
+            height,
+            0,
+            GL11.GL_RGBA,
+            GL11.GL_UNSIGNED_BYTE,
+            buf
+        )
         GL30.glGenerateMipmap(GL11.GL_TEXTURE_2D)
         GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL14.GL_TEXTURE_LOD_BIAS, -1f)
         GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR)
@@ -67,15 +75,101 @@ object OpenGLContext : Context {
         OpenGLTexture(id, width, height).also { log.verbose?.i("Loaded", it) }
     }
 
+    override fun loadTilesetTexture(log: MainLogger, path: String, tileSize: Int): TilesetTexture = tilesetTextureCache.getOrPut(path) {
+        var buf: ByteBuffer?
+        val width: Int
+        val height: Int
+        val realPath = Resources.getRealPath(path)
+        Stack.push { stack ->
+            val w = stack.mallocInt(1)
+            val h = stack.mallocInt(1)
+            val channels = stack.mallocInt(1)
+            buf = STBImage.stbi_load(realPath, w, h, channels, 4)
+            if (buf == null) throw FileNotFoundException("Texture not loaded: [" + realPath + "] " + STBImage.stbi_failure_reason())
+            width = w.get()
+            height = h.get()
+        }
+        val id = GL11.glGenTextures()
+        GL11.glBindTexture(GL30.GL_TEXTURE_2D_ARRAY, id)
+        //GL11.glPixelStorei(GL11.GL_UNPACK_ALIGNMENT, 1)
+
+        //GL42.glTexStorage3D(GL30.GL_TEXTURE_2D_ARRAY, mipLevelCount, GL11.GL_RGBA8, width, height, layerCount)
+        //GL30.glTexSubImage3D(GL30.GL_TEXTURE_2D_ARRAY, 0, 0, 0, 0, width, height, layerCount, GL_RGBA, GL_UNSIGNED_BYTE, texels)
+
+        val arr = ByteArray(buf!!.capacity())
+        buf!!.get(arr)
+
+        val tileWidth = tileSize       // number of pixels in a row of 1 tile
+        val tileHeight = tileSize      // number of pixels in a column of 1 tile
+        val channels = 4               // 4 for RGBA
+
+        val tilesX = width / tileWidth
+        val tilesY = height / tileHeight
+        val imageCount = tilesX * tilesY
+
+        GL12.glTexImage3D(
+            GL30.GL_TEXTURE_2D_ARRAY,
+            0,
+            GL11.GL_RGBA8,
+            tileWidth,
+            tileHeight,
+            imageCount,
+            0,
+            GL11.GL_RGBA,
+            GL11.GL_UNSIGNED_BYTE,
+            0
+        )
+
+        val tile = BufferUtils.createByteBuffer(tileWidth * tileHeight * channels)
+        val tileSizeX = tileWidth * channels
+        val rowLength = tilesX * tileSizeX
+
+        for (iy in 0 until tilesY) {
+            for (ix in 0 until tilesX) {
+                val position = iy * rowLength * tileHeight + ix * tileSizeX
+                for (rowInTile in 0 until tileHeight) {
+                    arr.asList().slice(position + rowInTile * rowLength until position + rowInTile * rowLength + tileSizeX).forEachIndexed { i, a ->
+                        tile[rowInTile * tileSizeX + i] = a
+                    }
+                }
+
+                val i = iy * tilesX + ix
+                GL12.glTexSubImage3D(
+                    GL30.GL_TEXTURE_2D_ARRAY, 0,
+                    0, 0, i,
+                    tileWidth, tileHeight, 1,
+                    GL11.GL_RGBA,
+                    GL11.GL_UNSIGNED_BYTE,
+                    tile
+                )
+            }
+        }
+
+        GL30.glGenerateMipmap(GL30.GL_TEXTURE_2D_ARRAY)
+        GL11.glTexParameterf(GL30.GL_TEXTURE_2D_ARRAY, GL14.GL_TEXTURE_LOD_BIAS, -1f)
+        GL11.glTexParameteri(GL30.GL_TEXTURE_2D_ARRAY, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR)
+        GL11.glTexParameteri(GL30.GL_TEXTURE_2D_ARRAY, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR)
+        //GL11.glTexParameterf(GL30.GL_TEXTURE_2D_ARRAY, GL14.GL_TEXTURE_LOD_BIAS, -1f)
+        //GL11.glTexParameteri(GL30.GL_TEXTURE_2D_ARRAY, GL14.GL_GENERATE_MIPMAP, GL11.GL_TRUE)
+        if (GL.getCapabilities().GL_EXT_texture_filter_anisotropic) {
+            val amount = min(4f, GL11.glGetFloat(EXTTextureFilterAnisotropic.GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT))
+            GL11.glTexParameterf(GL30.GL_TEXTURE_2D_ARRAY, EXTTextureFilterAnisotropic.GL_TEXTURE_MAX_ANISOTROPY_EXT, amount)
+        } else {
+            log.e("error: Anisotropic filtering isn't supported")
+        }
+        //STBImage.stbi_image_free(buf!!)
+        OpenGLTilesetTexture(id, tileWidth, tileHeight, imageCount).also { log.verbose?.i("Loaded", it) }
+    }
+
     private fun preprocessGLSL(filePath: String, glsl: String): String {
-        return glsl.lines().map {
+        return glsl.lines().joinToString("\n") {
             if (it.startsWith("#include")) {
                 val path = it.substringAfter("#include").trim()
                     .substringAfter('"')
                     .substringBeforeLast('"')
-                Resources.loadAsString((Path(filePath).parent / path).toString())
+                Resources.loadAsString((Path(filePath).parent / path).toString()) + "#line 1\n"
             } else it
-        }.joinToString("\n")
+        }
     }
 
     override fun loadShader(log: MainLogger, fragmentPath: String, vertexPath: String): Shader = shaderCache.getOrPut(fragmentPath to vertexPath) {
@@ -216,4 +310,5 @@ object OpenGLContext : Context {
     private val fontCache = HashMap<String, Font>()
     private val shaderCache = HashMap<Pair<String, String>, Shader>()
     private val textureCache = HashMap<String, Texture>()
+    private val tilesetTextureCache = HashMap<String, TilesetTexture>()
 }

@@ -6,6 +6,7 @@ import io.posidon.uranium.Global
 import io.posidon.uranium.gfx.assets.invoke
 import io.posidon.uranium.gfx.renderer.Renderer
 import io.posidon.uranium.gfx.renderer.renderQuad2D
+import io.posidon.uranium.mathlib.types.functions.toRawBits
 import io.posidon.uranium.scene.node.container.ChunkMap2D
 import io.posidon.uranium.scene.node.container.minusAssign
 import io.posidon.uranium.scene.node.container.plusAssign
@@ -49,7 +50,7 @@ class AsteroidNode(
 
     private fun explode(chunkMap: ChunkMap2D) {
         chunkMap -= this
-        val random = Random(position.longUID())
+        val random = Random(position.toRawBits())
         repeat(6) {
             chunkMap += ItemNode(position.copy(), composition).apply {
                 val x = (random.nextFloat() - .5f) * 5f

@@ -11,12 +11,12 @@
         <option name="gradleJvm" value="15" />
         <option name="modules">
           <set>
-            <option value="/run/media/zagura/posidon/programing/Kotlin/rpg" />
-            <option value="/run/media/zagura/posidon/programing/Kotlin/rpg/buildSrc" />
-            <option value="/run/media/zagura/posidon/programing/Kotlin/rpg/editor" />
-            <option value="/run/media/zagura/posidon/programing/Kotlin/rpg/engine" />
-            <option value="/run/media/zagura/posidon/programing/Kotlin/rpg/game" />
-            <option value="/run/media/zagura/posidon/programing/Kotlin/rpg/shared" />
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/buildSrc" />
+            <option value="$PROJECT_DIR$/editor" />
+            <option value="$PROJECT_DIR$/engine" />
+            <option value="$PROJECT_DIR$/game" />
+            <option value="$PROJECT_DIR$/shared" />
           </set>
         </option>
       </GradleProjectSettings>

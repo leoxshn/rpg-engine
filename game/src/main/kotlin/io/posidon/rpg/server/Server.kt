@@ -3,8 +3,10 @@ package io.posidon.rpg.server
 import io.posidon.rpg.client.world.entities.AsteroidNode
 import io.posidon.uranium.mathlib.types.Vec2f
 import io.posidon.uranium.mathlib.types.Vec2i
+import io.posidon.uranium.mathlib.types.functions.*
 import io.posidon.rpg.client.world.Composition
 import io.posidon.rpg.client.world.Player
+import io.posidon.uranium.mathlib.types.functions.toRawBits
 import io.posidon.uranium.scene.node.Node
 import io.posidon.uranium.scene.node.container.ChunkMap
 import io.posidon.uranium.scene.node.container.ChunkMap2D
@@ -20,7 +22,7 @@ class Server(
 
     fun createChunk(pos: Vec2i): ChunkMap.Chunk<Vec2i> {
         val chunk = ChunkMap.Chunk(chunkMap)
-        val random = Random(pos.longUID())
+        val random = Random(pos.toRawBits())
         for (i in 4..random.nextInt(32)) {
             val x = random.nextDouble(0.0, chunkMap.chunkSize.toDouble()).toFloat()
             val y = random.nextDouble(0.0, chunkMap.chunkSize.toDouble()).toFloat()

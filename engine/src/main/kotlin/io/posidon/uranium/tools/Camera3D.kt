@@ -76,10 +76,12 @@ class Camera3D(
 
         override fun preRender() {
             enable(Renderer.Feature.DEPTH_TEST)
+            enable(Renderer.Feature.CULL_FACE)
         }
 
         override fun postRender() {
             disable(Renderer.Feature.DEPTH_TEST)
+            disable(Renderer.Feature.CULL_FACE)
         }
 
         override fun renderQuad(window: Window, shader: Shader, x: Float, y: Float, z: Float, width: Float, height: Float, depth: Float, rotationX: Float, rotationY: Float, rotationZ: Float) {

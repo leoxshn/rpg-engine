@@ -2,6 +2,7 @@ package io.posidon.rpg.client.world.entities
 
 import io.posidon.rpg.client.world.Composition
 import io.posidon.uranium.mathlib.types.Vec2f
+import io.posidon.uranium.mathlib.types.functions.*
 import io.posidon.uranium.Global
 import io.posidon.uranium.gfx.assets.invoke
 import io.posidon.uranium.gfx.renderer.Renderer

@@ -113,7 +113,7 @@ class SceneChildrenBuilder(
             nodes += this
         }
 
-        fun post(fragmentPath: String, colorBufferCount: Int, minWidth: Int = min(window.width, window.height), block: FilterBuilder.() -> Unit): Filter {
+        fun post(fragmentPath: String, colorBufferCount: Int, minWidth: Int = -1, block: FilterBuilder.() -> Unit): Filter {
             val builder = FilterBuilder(minWidth).apply(block)
             return Filter(renderer, window, fragmentPath, colorBufferCount, minWidth, builder.uniforms, builder.nodes)
         }

@@ -7,6 +7,7 @@ import io.posidon.uranium.scene.SceneChildrenBuilder
 import io.posidon.uranium.scene.node.container.ChunkMap2D
 import io.posidon.uranium.ui.FpsCounter
 import io.posidon.uranium.mathlib.types.Vec2f
+import io.posidon.uranium.mathlib.types.functions.*
 
 class World : Scene() {
 

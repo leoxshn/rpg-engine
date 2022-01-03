@@ -12,10 +12,10 @@ class Inspector(
     font: Font
 ) : NodeWrapper<Text>(Text(18f, "", position, font)) {
 
-    val redMatterSymbol by onInit { node!!.customSymbol(context, log, "/textures/symbol/red_matter.png") }
-    val greenMatterSymbol by onInit { node!!.customSymbol(context, log, "/textures/symbol/green_matter.png") }
-    val blueMatterSymbol by onInit { node!!.customSymbol(context, log, "/textures/symbol/blue_matter.png") }
-    val stringMatterSymbol by onInit { node!!.customSymbol(context, log, "/textures/symbol/string_matter.png") }
+    val redMatterSymbol by onInit { node.customSymbol(context, log, "/textures/symbol/red_matter.png") }
+    val greenMatterSymbol by onInit { node.customSymbol(context, log, "/textures/symbol/green_matter.png") }
+    val blueMatterSymbol by onInit { node.customSymbol(context, log, "/textures/symbol/blue_matter.png") }
+    val stringMatterSymbol by onInit { node.customSymbol(context, log, "/textures/symbol/string_matter.png") }
 
     fun setEntity(entity: EntityNode?) {
         text = if (entity == null) "" else """
@@ -27,5 +27,5 @@ class Inspector(
         """.trimMargin()
     }
 
-    private var text by node!!::text
+    private var text by node::text
 }

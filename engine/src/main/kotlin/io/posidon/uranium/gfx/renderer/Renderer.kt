@@ -41,18 +41,19 @@ interface Renderer {
         attachment: Int,
         width: Int,
         height: Int
-    ): Buffer
+    ): FrameBuffer
 
     fun createDepthBuffer(
         width: Int,
         height: Int
-    ): Buffer
+    ): FrameBuffer
 
     enum class Feature {
-        DEPTH_TEST
+        DEPTH_TEST,
+        CULL_FACE,
     }
 
-    abstract class Buffer (
+    abstract class FrameBuffer (
         width: Int,
         height: Int
     ) {

@@ -1,11 +1,8 @@
-import org.gradle.api.Project
 import org.gradle.internal.os.OperatingSystem
-import org.gradle.kotlin.dsl.dependencies
-import org.gradle.kotlin.dsl.project
 
 object Versions {
     val kotlinVersion = "1.5.0"
-    val lwjglVersion = "3.2.3"
+    val lwjglVersion = "3.3.0"
     val lwjglNatives = OperatingSystem.current().let {
         when {
             it.isLinux -> "natives-linux"

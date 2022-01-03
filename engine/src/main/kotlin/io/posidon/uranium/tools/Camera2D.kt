@@ -6,6 +6,7 @@ import io.posidon.uranium.gfx.assets.Shader
 import io.posidon.uranium.gfx.renderer.ModifiedRenderer
 import io.posidon.uranium.gfx.renderer.Renderer
 import io.posidon.uranium.mathlib.types.Mat4f
+import io.posidon.uranium.mathlib.types.functions.*
 import io.posidon.uranium.scene.node.Node
 import io.posidon.uranium.window.Window
 

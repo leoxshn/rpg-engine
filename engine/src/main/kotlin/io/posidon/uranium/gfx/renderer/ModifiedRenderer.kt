@@ -28,6 +28,6 @@ interface ModifiedRenderer : Renderer {
     override fun useFrameBuffer(buffer: Filter, block: Renderer.() -> Unit) = renderer.useFrameBuffer(buffer, block)
     override fun enable(feature: Renderer.Feature) = renderer.enable(feature)
     override fun disable(feature: Renderer.Feature) = renderer.disable(feature)
-    override fun createColorBuffer(attachment: Int, width: Int, height: Int): Renderer.Buffer = renderer.createColorBuffer(attachment, width, height)
-    override fun createDepthBuffer(width: Int, height: Int): Renderer.Buffer = renderer.createDepthBuffer(width, height)
+    override fun createColorBuffer(attachment: Int, width: Int, height: Int): Renderer.FrameBuffer = renderer.createColorBuffer(attachment, width, height)
+    override fun createDepthBuffer(width: Int, height: Int): Renderer.FrameBuffer = renderer.createDepthBuffer(width, height)
 }

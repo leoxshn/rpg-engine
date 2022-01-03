@@ -7,6 +7,7 @@ import io.posidon.uranium.gfx.assets.invoke
 import io.posidon.uranium.gfx.renderer.Renderer
 import io.posidon.uranium.gfx.renderer.renderMesh2D
 import io.posidon.uranium.input.Key
+import io.posidon.uranium.mathlib.types.functions.*
 import io.posidon.uranium.scene.node.Node
 import io.posidon.uranium.scene.node.container.ChunkMap2D
 import io.posidon.uranium.window.Window
